@@ -28,7 +28,7 @@
     namespace csharp TestClient.Protocols
     namespace scala org.fitbos.chatServer.protocols
 
-    include XXXX.b
+    include XXXX
 
     node Client as C            # The game client
     node LoginServer as L       # 
