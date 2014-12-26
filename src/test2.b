@@ -14,24 +14,23 @@ struct UserInfo
 	List<UserInfo> realUsers
 end
 
-enum Weekdays
-	Monday
-	Tuesday
-	Friday = 5
-	Saturday
-	Sunday = 10 # Yeah!!
+enum LoginResult
+	Succeed
+	InvalidUsername
+	InvalidPassword
 end
 
 direction Client -> LoginServer
     message RequestLogin    # Login using the client user info
-        UserInfo info       # The client user info
+        String username		# Username
+        String password		# Password
     end
+end
 
-    message RequestLogin    # Login using the client user info
-        UserInfo info       # The client user info
-        List<UserInfo> onlineUsers
-        Map<Int, UserInfo> allUsers
-    end
+direction Client <- LoginServer
+	message RespondLogin
+		LoginResult result
+	end
 end
 
 sequence Login

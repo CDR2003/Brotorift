@@ -20,7 +20,8 @@ class Lexer < RLTK::Lexer
 	# Operator
 	rule(/\./)				{ :DOT }
 	rule(/\=/)				{ :ASSIGN }
-	rule(/->/)				{ :ARROW }
+	rule(/<-/)				{ :LARROW }
+	rule(/->/)				{ :RARROW }
 	rule(/:/)				{ :COLON }
 	rule(/</)				{ :LANGLE }
 	rule(/>/)				{ :RANGLE }
