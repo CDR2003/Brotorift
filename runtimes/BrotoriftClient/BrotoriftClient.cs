@@ -6,34 +6,10 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
-namespace Brotorift.Client
+namespace Brotorift
 {
-	#region Generated Enums & Structs
-
-	#region Enums
-
-	public enum LoginResult
+	public abstract class Client
 	{
-		Succeed,
-		InvalidUsername,
-		InvalidPassword
-	}
-
-	#endregion
-
-	#region Structs
-	#endregion
-
-	#endregion
-
-	public class BrotoriftClient
-	{
-		#region Runtime
-
-		public event EventHandler Disconnected;
-
-		private IBrotoriftClientHandler _handler;
-
 		private TcpClient _client;
 
 		private Thread _recvThread;
@@ -44,24 +20,21 @@ namespace Brotorift.Client
 
 		private int _segmentSize;
 
-		private Queue<BrotoriftPacket> _packets;
+		private Queue<Packet> _packetsToReceive;
 
-		private Mutex _packetsLock;
+		private Queue<Packet> _packetsToSend;
 
-		public BrotoriftClient( IBrotoriftClientHandler handler )
-			: this( handler, 1024 )
+		private Mutex _receivePacketsLock;
+
+		public Client( int segmentSize )
 		{
-		}
-
-		public BrotoriftClient( IBrotoriftClientHandler handler, int segmentSize )
-		{
-			_handler = handler;
 			_client = new TcpClient();
 			_recvThread = new Thread( this.ReceiveLoop );
 			_recvBuffer = new MemoryStream();
 			_segmentSize = segmentSize;
-			_packets = new Queue<BrotoriftPacket>();
-			_packetsLock = new Mutex();
+			_packetsToReceive = new Queue<Packet>();
+			_packetsToSend = new Queue<Packet>();
+			_receivePacketsLock = new Mutex();
 		}
 
 		public void Connect( string hostname, int port )
@@ -83,23 +56,31 @@ namespace Brotorift.Client
 			_recvThread.Start();
 		}
 
-		public void Update()
+		public bool Update()
 		{
-			_packetsLock.WaitOne();
-			while( _packets.Count > 0 )
+			_receivePacketsLock.WaitOne();
+			while( _packetsToReceive.Count > 0 )
 			{
-				var packet = _packets.Dequeue();
+				var packet = _packetsToReceive.Dequeue();
 				if( packet == null )
 				{
-					if( this.Disconnected != null )
-					{
-						this.Disconnected( this, EventArgs.Empty );
-					}
-					return;
+					return false;
 				}
 				this.ProcessPacket( packet );
 			}
-			_packetsLock.ReleaseMutex();
+			_receivePacketsLock.ReleaseMutex();
+
+			while( _packetsToSend.Count > 0 )
+			{
+				var packet = _packetsToSend.Dequeue();
+				var result = this.DoSendPacket( packet );
+				if( result == false )
+				{
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		private void ReceiveLoop()
@@ -127,9 +108,9 @@ namespace Brotorift.Client
 			}
 			catch( IOException )
 			{
-				_packetsLock.WaitOne();
-				_packets.Enqueue( null );
-				_packetsLock.ReleaseMutex();
+				_receivePacketsLock.WaitOne();
+				_packetsToReceive.Enqueue( null );
+				_receivePacketsLock.ReleaseMutex();
 			}
 		}
 
@@ -146,9 +127,9 @@ namespace Brotorift.Client
 				}
 
 				var content = reader.ReadBytes( packetSize );
-				_packetsLock.WaitOne();
-				_packets.Enqueue( new BrotoriftPacket( content ) );
-				_packetsLock.ReleaseMutex();
+				_receivePacketsLock.WaitOne();
+				_packetsToReceive.Enqueue( new Packet( content ) );
+				_receivePacketsLock.ReleaseMutex();
 			}
 
 			if( _recvBuffer.Position > 0 )
@@ -158,7 +139,12 @@ namespace Brotorift.Client
 			}
 		}
 
-		private void SendPacket( BrotoriftPacket packet )
+		protected void SendPacket( Packet packet )
+		{
+			_packetsToSend.Enqueue( packet );
+		}
+
+		private bool DoSendPacket( Packet packet )
 		{
 			var stream = new MemoryStream();
 			var writer = new BinaryWriter( stream );
@@ -171,62 +157,12 @@ namespace Brotorift.Client
 			}
 			catch( IOException )
 			{
-				if( this.Disconnected != null )
-				{
-					this.Disconnected( this, EventArgs.Empty );
-				}
+				return false;
 			}
+
+			return true;
 		}
 
-		#endregion
-
-		#region Generated
-
-		#region Message Headers
-
-		private enum Message
-		{
-			// Client -> LoginServer
-			CL_Login = 0,
-			SetName = 0,
-
-			// LoginServer -> Client
-			LC_ReceiveLoginResult = 100
-		}
-
-		#endregion
-
-		#region Message Senders
-
-		public void SetName( string name )
-		{
-			var packet = new BrotoriftPacket( (int)Message.SetName );
-			packet.WriteString( name );
-			this.SendPacket( packet );
-		}
-
-		#endregion
-
-		#region Message Receivers
-
-		private void ProcessPacket( BrotoriftPacket packet )
-		{
-			var packetId = (Message)packet.Header;
-			switch( packetId )
-			{
-				case Message.LC_ReceiveLoginResult:
-					{
-						var result = packet.ReadEnum<LoginResult>();
-						_handler.ReceiveLoginResult( result );
-					}
-					break;
-				default:
-					break;
-			}
-		}
-
-		#endregion
-
-		#endregion
+		protected abstract void ProcessPacket( Packet packet );
 	}
 }

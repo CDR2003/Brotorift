@@ -1,12 +1,8 @@
 include 'kljsdf'
 
-namespace csharp Fitbos.Game
-namespace scala org.fitbos.game
-
-node Client
-node Client # aaaa
-node Server as S
-node Server as S # dsfkldfskljdfs
+node unity Client namespace Fitbos.Chat # aaaa
+node scala ChatServer as S
+node java XXX as X namespace org.fuck
 
 struct UserInfo
 	String username

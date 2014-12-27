@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Brotorift.Client
+namespace Brotorift
 {
-	public class BrotoriftPacket
+	public class Packet
 	{
 		public int Header { get; private set; }
 
@@ -32,12 +32,12 @@ namespace Brotorift.Client
 
 		private BinaryReader _reader;
 
-		public BrotoriftPacket( byte[] content )
+		public Packet( byte[] content )
 			: this( new MemoryStream( content ) )
 		{
 		}
 
-		public BrotoriftPacket( MemoryStream stream )
+		public Packet( MemoryStream stream )
 		{
 			_stream = stream;
 			_reader = new BinaryReader( _stream );
@@ -45,7 +45,7 @@ namespace Brotorift.Client
 			this.Header = this.ReadInt();
 		}
 
-		public BrotoriftPacket( int header )
+		public Packet( int header )
 		{
 			this.Header = header;
 			_stream = new MemoryStream();

@@ -1,0 +1,14 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    ffi (1.9.6-x86-mingw32)
+    filigree (0.3.0)
+    rltk (3.0.0)
+      ffi (>= 1.0.0)
+      filigree (>= 0.2.0)
+
+PLATFORMS
+  x86-mingw32
+
+DEPENDENCIES
+  rltk

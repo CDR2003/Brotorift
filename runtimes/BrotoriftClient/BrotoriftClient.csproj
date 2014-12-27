@@ -40,9 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BrotoriftClient.cs" />
-    <Compile Include="BrotoriftClientProtocol.cs" />
     <Compile Include="BrotoriftPacket.cs" />
-    <Compile Include="IBrotoriftClientHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

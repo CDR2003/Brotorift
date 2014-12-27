@@ -23,24 +23,19 @@ class IncludeDecl < Decl
 	end
 end
 
-class NamespaceDecl < Decl
-	value :language, String
-	value :namespace, String
-
-	def to_s
-		"namespace #{language} #{namespace}"
-	end
-end
-
 class NodeDecl < Decl
 	value :name, String
+	value :language, String
 	value :nickname, String
+	value :namespace, String
 	value :doc, String
 
 	def to_s
 		nickname_str = ''
 		nickname_str = " as #{nickname}" if nickname != name
-		"node #{name}#{nickname_str}#{doc_str}"
+		namespace_str = ''
+		namespace_str = " namespace #{namespace}" if namespace != ''
+		"node #{language} #{name}#{nickname_str}#{namespace_str}#{doc_str}"
 	end
 end
 
@@ -109,14 +104,15 @@ class MessageDef < ASTNode
 end
 
 class DirectionDecl < Decl
-	value :from, String
-	value :to, String
+	value :client, String
+	value :direction, String
+	value :server, String
 	value :doc, String
 	child :messages, [MessageDef]
 
 	def to_s
 		messages_str = messages.join ''
-		"direction #{from} -> #{to}#{doc_str}\n#{messages_str}end"
+		"direction #{client} #{direction} #{server}#{doc_str}\n#{messages_str}end"
 	end
 end
 
