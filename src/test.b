@@ -1,40 +1,39 @@
-include XXXX
-
-node Client namespace TestClient as C
-node LoginServer namespace org.fitbos.loginServer as L
-node GameServer as G
+node unity Client namespace Fitbos.Chat # aaaa
+node scala LoginServer as L
+node java XXX as X namespace org.fuck
 
 struct UserInfo
-    String username
-    String password
+	Long id
+	String username
+	String password
+end
+
+struct MyInfo
+	String username
+	Map<Int, String> users
+	List<UserInfo> realUsers
 end
 
 enum LoginResult
-    Succeeded = -1
-    InvalidUsername = 0x11
-    InvalidPassword
-    Fuck = 100
+	Succeed
+	InvalidUsername
+	InvalidPassword
 end
 
 direction Client -> LoginServer
     message RequestLogin    # Login using the client user info
-        UserInfo info       # The client user info
-    end
-
-    message RequestLogin    # Login using the client user info
-        UserInfo info       # The client user info
-        List<UserInfo> onlineUsers
-        Map<Int, UserInfo> allUsers
+        String username		# Username
+        String password		# Password
     end
 end
 
-direction LoginServer -> Client
-    message RespondLogin    # Respond to the login message
-        LoginResult result  # The login result
-    end
+direction Client <- LoginServer
+	message RespondLogin
+		LoginResult result
+	end
 end
 
 sequence Login
-    C -> L: RequestLogin
-    L -> C: RespondLogin
+    Client -> L: RequestLogin
+    Client <- L: RespondLogind
 end

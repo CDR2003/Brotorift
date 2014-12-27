@@ -122,7 +122,7 @@ end
 
 class DirectionDecl < TopDecl
 	value :client, String
-	value :direction, String
+	value :direction, Symbol
 	value :server, String
 	value :doc, String
 	child :messages, [MessageDecl]
@@ -134,13 +134,14 @@ class DirectionDecl < TopDecl
 end
 
 class StepDecl < ASTNode
-	value :from, String
-	value :to, String
+	value :client, String
+	value :direction, Symbol
+	value :server, String
 	value :message, String
 	value :doc, String
 
 	def to_s
-		"#{from} -> #{to}: #{message}#{doc_str}\n"
+		"#{client} #{direction} #{server}: #{message}#{doc_str}\n"
 	end
 end
 

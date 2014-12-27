@@ -85,8 +85,8 @@ class Parser < RLTK::Parser
 	end
 
 	production(:arrow) do
-		clause('LARROW')											{ |_| '<-' }
-		clause('RARROW')											{ |_| '->' }
+		clause('LARROW')											{ |_| :left }
+		clause('RARROW')											{ |_| :right }
 	end
 
 	list(:message_list, :message)
@@ -102,7 +102,7 @@ class Parser < RLTK::Parser
 	list(:step_list, :step)
 
 	production(:step) do
-		clause('IDENT RARROW IDENT COLON IDENT doc')				{ |from, _, to, _, message, doc| StepDecl.new self.position, from, to, message, doc }
+		clause('IDENT arrow IDENT COLON IDENT doc')					{ |client, direction, server, _, message, doc| StepDecl.new self.position, client, direction, server, message, doc }
 	end
 
 	finalize
