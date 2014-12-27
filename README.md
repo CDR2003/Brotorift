@@ -26,39 +26,34 @@
 
 ## Sample code
 
-    namespace csharp TestClient.Protocols
-    namespace scala org.fitbos.chatServer.protocols
+    include 'kljsdf'
 
-    include XXXX
-
-    node Client as C            # The game client
-    node LoginServer as L       # 
-    node GameServer as G        # 游戏服务器
+    node unity Client namespace Fitbos.Chat # aaaa
+    node scala ChatServer as S
+    node java XXX as X namespace org.fuck
 
     struct UserInfo
         String username
-        String password
+        Map<Int, String> users
+        List<UserInfo> realUsers
     end
 
     enum LoginResult
-        Succeeded = 0
+        Succeed
         InvalidUsername
         InvalidPassword
     end
 
     direction Client -> LoginServer
         message RequestLogin    # Login using the client user info
-            UserInfo info       # The client user info
-        end
-
-        message RequestLogin    # Login using the client user info
-            UserInfo info       # The client user info
+            String username     # Username
+            String password     # Password
         end
     end
 
-    direction LoginServer -> Client
-        message RespondLogin    # Respond to the login message
-            LoginResult result  # The login result
+    direction Client <- LoginServer
+        message RespondLogin
+            LoginResult result
         end
     end
 
