@@ -14,6 +14,8 @@ enum LoginResult
 	Succeed
 	InvalidUsername
 	InvalidPassword
+
+	Succeed
 end
 
 direction Client -> LoginServer

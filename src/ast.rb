@@ -2,7 +2,24 @@ require 'rltk/ast'
 require './lexer'
 
 
+class Position
+	attr_reader :start, :stop
+
+	def initialize start, stop
+		raise "Filename should be the same." if start.file_name != stop.file_name
+		@start = start
+		@stop = stop
+	end
+
+	def to_s
+		"#{@start.file_name}:#{@start.line_number}:#{@start.line_offset} - #{@stop.line_number}:#{@stop.line_offset}"
+	end
+end
+
+
 class ASTNode < RLTK::ASTNode
+	value :position, Position
+
 	def doc_str
 		if doc == ''
 			return ''
@@ -12,10 +29,10 @@ class ASTNode < RLTK::ASTNode
 	end
 end
 
-class Decl < ASTNode
+class TopDecl < ASTNode
 end
 
-class IncludeDecl < Decl
+class IncludeDecl < TopDecl
 	value :filename, String
 
 	def to_s
@@ -23,7 +40,7 @@ class IncludeDecl < Decl
 	end
 end
 
-class NodeDecl < Decl
+class NodeDecl < TopDecl
 	value :name, String
 	value :language, String
 	value :nickname, String
@@ -39,7 +56,7 @@ class NodeDecl < Decl
 	end
 end
 
-class TypeDef < ASTNode
+class TypeDecl < ASTNode
 	value :name, String
 	value :params, [String]
 
@@ -50,8 +67,8 @@ class TypeDef < ASTNode
 	end
 end
 
-class MemberDef < ASTNode
-	value :type, TypeDef
+class MemberDecl < ASTNode
+	value :type, TypeDecl
 	value :name, String
 	value :doc, String
 
@@ -60,10 +77,10 @@ class MemberDef < ASTNode
 	end
 end
 
-class StructDecl < Decl
+class StructDecl < TopDecl
 	value :name, String
 	value :doc, String
-	child :members, [MemberDef]
+	child :members, [MemberDecl]
 
 	def to_s
 		members_str = members.join ''
@@ -71,7 +88,7 @@ class StructDecl < Decl
 	end
 end
 
-class EnumElementDef < ASTNode
+class EnumElementDecl < ASTNode
 	value :name, String
 	value :value, Fixnum
 	value :doc, String
@@ -81,10 +98,10 @@ class EnumElementDef < ASTNode
 	end
 end
 
-class EnumDecl < Decl
+class EnumDecl < TopDecl
 	value :name, String
 	value :doc, String
-	child :elements, [EnumElementDef]
+	child :elements, [EnumElementDecl]
 
 	def to_s
 		elements_str = elements.join ''
@@ -92,10 +109,10 @@ class EnumDecl < Decl
 	end
 end
 
-class MessageDef < ASTNode
+class MessageDecl < ASTNode
 	value :name, String
 	value :doc, String
-	child :members, [MemberDef]
+	child :members, [MemberDecl]
 
 	def to_s
 		members_str = members.join ''
@@ -103,12 +120,12 @@ class MessageDef < ASTNode
 	end
 end
 
-class DirectionDecl < Decl
+class DirectionDecl < TopDecl
 	value :client, String
 	value :direction, String
 	value :server, String
 	value :doc, String
-	child :messages, [MessageDef]
+	child :messages, [MessageDecl]
 
 	def to_s
 		messages_str = messages.join ''
@@ -116,7 +133,7 @@ class DirectionDecl < Decl
 	end
 end
 
-class StepDef < ASTNode
+class StepDecl < ASTNode
 	value :from, String
 	value :to, String
 	value :message, String
@@ -127,17 +144,13 @@ class StepDef < ASTNode
 	end
 end
 
-class SequenceDecl < Decl
+class SequenceDecl < TopDecl
 	value :name, String
 	value :doc, String
-	child :steps, [StepDef]
+	child :steps, [StepDecl]
 
 	def to_s
 		steps_str = steps.join ''
 		"sequence #{name}#{doc_str}\n#{steps_str}end"
 	end
-end
-
-class Program < ASTNode
-	child :decls, [Decl]
 end
