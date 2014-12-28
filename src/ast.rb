@@ -12,7 +12,7 @@ class Position
 	end
 
 	def to_s
-		"#{@start.file_name}:#{@start.line_number}:#{@start.line_offset} - #{@stop.line_number}:#{@stop.line_offset}"
+		"#{@start.file_name}(#{@start.line_number})"
 	end
 end
 

@@ -20,9 +20,9 @@ class InitialCaseError < CompilerError
 
 	def info
 		if @type == 'node_nick' then
-			return "Nickname of nodes should be #{@initial_case} case: '#{@ast.nickname}'"
+			return "'#{@ast.nickname}' : mickname of nodes should be #{@initial_case} case"
 		else
-			return "Name of #{@type}s should be #{@initial_case} case: '#{@ast.name}'"
+			return "'#{@ast.name}' : mame of #{@type}s should be #{@initial_case} case"
 		end
 	end
 end
@@ -35,7 +35,7 @@ class BuiltinNameConflictError < CompilerError
 	end
 
 	def info
-		"Type name conflict with built-in type: #{@name}"
+		"'#{@name}' : type name conflict with built-in type"
 	end
 end
 
@@ -50,7 +50,7 @@ class DuplicateDefError < CompilerError
 	end
 
 	def info
-		"Duplicate #{@type} definition encountered: '#{@name}'\n    Previous #{@type} definition here: #{@old_pos}"
+		"'#{@name}' : #{@type} redefinition\n        #{@old_pos} : see previous #{@type} definition of '#{@name}'"
 	end
 end
 
@@ -62,7 +62,7 @@ class IncludeFileNotFoundError < CompilerError
 	end
 
 	def info
-		"Include file not found: '#{@filename}'"
+		"'#{@filename}' : include file not found: "
 	end
 end
 
@@ -75,7 +75,7 @@ class TypeParamCountMismatchError < CompilerError
 	end
 
 	def info
-		"Generic parameter count mismatch: expected #{@expected_count}, provided #{@actual_count}"
+		"generic parameter count mismatch: expected #{@expected_count}, provided #{@actual_count}"
 	end
 end
 
@@ -87,7 +87,7 @@ class TypeNotFoundError < CompilerError
 	end
 
 	def info
-		"Type not found: '#{@name}'"
+		"'#{@name}' : undefined type"
 	end
 end
 
@@ -99,7 +99,7 @@ class NodeNotFoundError < CompilerError
 	end
 
 	def info
-		"Node not found: '#{@name}'"
+		"'#{@name}' : undefined node"
 	end
 end
 
@@ -115,9 +115,9 @@ class DirectionNotFoundError < CompilerError
 	def info
 		case @direction
 		when :left
-			"Direction not found: #{@client.name} -> #{@server.name}"
+			"'#{@client.name} -> #{@server.name}' : undefined direction"
 		when :right
-			"Direction not found: #{@client.name} <- #{@server.name}"
+			"'#{@client.name} <- #{@server.name}' : undefined direction"
 		end
 	end
 end
@@ -131,7 +131,7 @@ class MessageNotFoundError < CompilerError
 	end
 
 	def info
-		"Message not found in direction '#{@direction.name}': '#{@name}'\n    Direction definition here: #{@direction.ast.position}"
+		"'#{@name}' undefined message in direction '#{@direction.name}'\n        #{@direction.ast.position} : see previous direction definition of '#{@direction.name}'"
 	end
 end
 
@@ -142,6 +142,6 @@ class ClientServerSameError < CompilerError
 	end
 
 	def info
-		"Client and server of a direction should not be the same"
+		"client and server of a direction should not be the same"
 	end
 end

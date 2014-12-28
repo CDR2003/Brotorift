@@ -255,10 +255,3 @@ class Compiler
 		@errors.push error
 	end
 end
-
-
-compiler = Compiler.new
-compiler.compile 'test.b'
-compiler.errors.each do |e|
-	puts e
-end

@@ -1,3 +1,4 @@
 source 'http://rubygems.org'
 
 gem 'rltk'
+gem 'colorize'

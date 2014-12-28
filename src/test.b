@@ -1,18 +1,5 @@
-node unity Client namespace Fitbos.Chat # aaaa
-node scala LoginServer as L
-node java XXX as X namespace org.fuck
-
-struct UserInfo
-	Long id
-	String username
-	String password
-end
-
-struct MyInfo
-	String username
-	Map<Int, String> users
-	List<UserInfo> realUsers
-end
+node unity Client as C namespace Fitbos.ChatServer
+node scala LoginServer as L namespace org.fitbos.chatServer
 
 enum LoginResult
 	Succeed
@@ -34,6 +21,6 @@ direction Client <- LoginServer
 end
 
 sequence Login
-    Client -> L: RequestLogin
-    Client <- L: RespondLogind
+    C -> L: RequestLogin
+    C <- L: RespondLogin
 end
