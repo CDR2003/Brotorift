@@ -26,6 +26,11 @@ namespace Brotorift
 
 		private Mutex _receivePacketsLock;
 
+		public Client()
+			: this( 1024 )
+		{
+		}
+
 		public Client( int segmentSize )
 		{
 			_client = new TcpClient();

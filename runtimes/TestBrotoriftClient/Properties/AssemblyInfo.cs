@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle( "TestBrotoriftClient_CSharp" )]
+[assembly: AssemblyTitle( "TestBrotoriftClient" )]
 [assembly: AssemblyDescription( "" )]
 [assembly: AssemblyConfiguration( "" )]
 [assembly: AssemblyCompany( "Microsoft" )]
-[assembly: AssemblyProduct( "TestBrotoriftClient_CSharp" )]
+[assembly: AssemblyProduct( "TestBrotoriftClient" )]
 [assembly: AssemblyCopyright( "Copyright © Microsoft 2014" )]
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible( false )]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid( "2e4e27a5-27fd-49ae-b238-6e3954323e8d" )]
+[assembly: Guid( "881c9a08-18b7-4e5f-8247-5cc49e8efc9d" )]
 
 // Version information for an assembly consists of the following four values:
 //

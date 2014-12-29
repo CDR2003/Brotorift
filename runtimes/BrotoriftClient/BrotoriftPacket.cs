@@ -116,6 +116,12 @@ namespace Brotorift
 				var readMap = readMapGeneric.MakeGenericMethod( new Type[] { k, v } );
 				result = readMap.Invoke( this, null );
 			}
+			else if( type.IsSubclassOf( typeof( IStruct ) ) )
+			{
+				var readStructGeneric = this.GetType().GetMethod( "ReadStruct`1" );
+				var readStruct = readStructGeneric.MakeGenericMethod( new Type[] { type } );
+				result = readStruct.Invoke( this, null );
+			}
 			else
 			{
 				throw new ArgumentException( "Brotorift do not recognize this type: " + type.Name );
@@ -205,6 +211,13 @@ namespace Brotorift
 			return map;
 		}
 
+		public T ReadStruct<T>() where T : IStruct, new()
+		{
+			var value = new T();
+			value.ReadFromPacket( this );
+			return value;
+		}
+
 		public T ReadEnum<T>() where T : struct, IConvertible
 		{
 			if( typeof( T ).IsEnum == false )
@@ -277,6 +290,10 @@ namespace Brotorift
 				var writeMapGeneric = this.GetType().GetMethod( "WriteMap`1" );
 				var writeMap = writeMapGeneric.MakeGenericMethod( new Type[] { k, v } );
 				writeMap.Invoke( this, new object[] { obj } );
+			}
+			else if( type.IsSubclassOf( typeof( IStruct ) ) )
+			{
+				this.WriteStruct( (IStruct)obj );
 			}
 			else
 			{
@@ -355,6 +372,11 @@ namespace Brotorift
 				this.Write( item.Key );
 				this.Write( item.Value );
 			}
+		}
+
+		public void WriteStruct( IStruct value )
+		{
+			value.WriteToPacket( this );
 		}
 	}
 }

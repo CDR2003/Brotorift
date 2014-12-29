@@ -19,6 +19,8 @@ class Compiler
 
 	def initialize
 		@errors = []
+		@message_base_id = 0
+		@message_id = 0
 	end
 
 	def compile filename
@@ -120,6 +122,8 @@ class Compiler
 			return
 		end
 
+		@message_base_id += 1000
+
 		old_direction = @runtime.get_direction client, direction_ast.direction, server
 		self.check_unique 'direction', old_direction, direction_ast
 
@@ -133,7 +137,8 @@ class Compiler
 	end
 
 	def compile_message message_ast
-		message_def = MessageDef.new message_ast
+		@message_id += 1
+		message_def = MessageDef.new message_ast, @message_base_id + @message_id
 		message_ast.members.each do |member_ast|
 			self.check_case 'message member', :lower, member_ast
 			self.check_unique 'message member', message_def.get_member(member_ast.name), member_ast
@@ -174,7 +179,7 @@ class Compiler
 
 		direction_def = @runtime.get_direction client, step_ast.direction, server
 		if direction_def == nil
-			add_error DirectionNotFoundError.new step_ast
+			add_error DirectionNotFoundError.new step_ast, client, step_ast.direction, server
 			return nil
 		end
 

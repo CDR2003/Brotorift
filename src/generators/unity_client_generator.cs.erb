@@ -1,0 +1,107 @@
+﻿using Brotorift;
+using UnityEngine;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace <%= node.namespace %>
+{
+	#region Enums
+	<% for e in runtime.enums.values %>
+	/// <summary>
+	/// <%= e.doc %>
+	/// </summary>
+	public enum <%= e.name %>
+	{<% for v in e.elements.values %>
+		/// <summary>
+		/// <%= v.doc %>
+		/// </summary>
+		<%= v.name %> = <%= v.value %>,
+	<% end %>}
+	<% end %>
+	#endregion
+
+	#region Structs
+	<% for s in runtime.structs.values %>
+	/// <summary>
+	/// <%= s.doc %>
+	/// </summary>
+	public struct <%= s.name %> : IStruct
+	{<% for m in s.members %>
+		/// <summary>
+		/// <%= m.doc %>
+		/// </summary>
+		<%= m.unity_def %>
+		<% end %>
+		public void ReadFromPacket( Packet packet )
+		{<% for m in s.members %>
+			this.<%= m.name %> = <%= m.unity_read %><% end %>
+		}
+
+		public void WriteToPacket( Packet packet )
+		{<% for m in s.members %>
+			<%= m.unity_write %><% end %>
+		}
+	}
+	<% end %>
+	#endregion
+
+	<% for node_direction in runtime.get_node_directions node, :client %>
+	public class <%= node_direction.class_name %> : Client
+	{
+		public interface IHandler
+		{<% for m in node_direction.in_direction.messages.values %>
+			/// <summary>
+			/// <%= m.doc %>
+			/// </summary>
+			<% for p in m.members %>/// <param name="<%= p.name %>"><%= p.doc %></param><% end %>
+			<%= m.unity %>;
+		<% end %>}
+
+		private IHandler _handler;
+
+		public <%= node_direction.class_name %>( IHandler handler )
+		{
+			_handler = handler;
+		}
+
+		private enum InMessage
+		{<% for m in node_direction.in_direction.messages.values %>
+			<%= m.name %> = <%= m.id %>,<% end %>
+		}
+
+		private enum OutMessage
+		{<% for m in node_direction.out_direction.messages.values %>
+			<%= m.name %> = <%= m.id %>,<% end %>
+		}
+
+		<% for m in node_direction.out_direction.messages.values %>
+		/// <summary>
+		/// <%= m.doc %>
+		/// </summary>
+		<% for p in m.members %>/// <param name="<%= p.name %>"><%= p.doc %></param><% end %>
+		public <%= m.unity %>
+		{
+			var packet = new Packet( (int)OutMessage.<%= m.name %> );
+			<% for p in m.members %><%= p.unity_write %>
+			<% end %>this.SendPacket( packet );
+		}<% end %>
+
+		protected override void ProcessPacket( Packet packet )
+		{
+			switch( (InMessage)packet.Header )
+			{
+				<% for m in node_direction.in_direction.messages.values %>
+				case InMessage.<%= m.name %>:
+					{<% for p in m.members %>
+						var <%= p.name %> = <%= p.unity_read %><% end %>
+						_handler.<%= m.name %>( <%= m.unity_param %> );
+					}
+					break;<% end %>
+				default:
+					break;
+			}
+		}
+	}
+	<% end %>
+}

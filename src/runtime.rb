@@ -136,11 +136,12 @@ end
 
 
 class MessageDef < Def
-	attr_reader :name, :members, :doc
+	attr_reader :name, :id, :members, :doc
 
-	def initialize ast
+	def initialize ast, id
 		super ast
 		@name = ast.name
+		@id = id
 		@members = []
 		@doc = ast.doc
 	end
@@ -246,5 +247,48 @@ class Runtime
 
 	def add_sequence sequence_def
 		@sequences[sequence_def.name] = sequence_def
+	end
+
+	def get_node_directions node, side
+		node_directions = {}
+		@directions.each do |direction|
+			next if side == :client and direction.client != node
+			next if side == :server and direction.server != node
+
+			opposite_node = nil
+			case side
+			when :client
+				opposite_node = direction.server
+			when :server
+				opposite_node = direction.client
+			end
+
+			node_direction = node_directions[opposite_node]
+			if node_direction == nil
+				node_direction = NodeDirection.new node, opposite_node
+				node_directions[opposite_node] = node_direction
+			end
+
+			if side == :client and direction.direction == :left
+				node_direction.in_direction = direction
+			elsif side == :client and direction.direction == :right
+				node_direction.out_direction = direction
+			elsif side == :server and direction.direction == :left
+				node_direction.out_direction = direction
+			elsif side == :server and direction.direction == :right
+				node_direction.in_direction = direction
+			end
+		end
+		node_directions.values
+	end
+end
+
+
+class NodeDirection
+	attr_accessor :local, :remote, :in_direction, :out_direction
+
+	def initialize local, remote
+		@local = local
+		@remote = remote
 	end
 end
