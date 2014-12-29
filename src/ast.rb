@@ -2,6 +2,15 @@ require 'rltk/ast'
 require './lexer'
 
 
+module RLTK
+	class StreamPosition
+		def to_s
+			"#{file_name}(#{line_number})"
+		end
+	end
+end
+
+
 class Position
 	attr_reader :start, :stop
 
@@ -12,7 +21,7 @@ class Position
 	end
 
 	def to_s
-		"#{@start.file_name}(#{@start.line_number})"
+		@start.to_s
 	end
 end
 

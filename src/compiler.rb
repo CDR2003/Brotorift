@@ -30,8 +30,12 @@ class Compiler
 
 	def compile_file runtime, filename
 		tokens = Lexer::lex_file filename
-		Parser::reset
-		ast = Parser::parse tokens
+		begin
+			ast = Parser::parse tokens
+		rescue RLTK::NotInLanguage => e
+			add_error UnexpectedTokenError.new e.current
+			return
+		end
 		self.compile_ast runtime, ast
 	end
 

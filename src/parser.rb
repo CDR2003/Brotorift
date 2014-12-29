@@ -14,10 +14,6 @@ end
 
 
 class Parser < RLTK::Parser
-	def self.reset
-		@@enum_value = 0
-	end
-
 	@@enum_value = 0
 
 	list(:decl_list, :decl)

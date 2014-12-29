@@ -145,3 +145,16 @@ class ClientServerSameError < CompilerError
 		"client and server of a direction should not be the same"
 	end
 end
+
+
+class UnexpectedTokenError < CompilerError
+	def initialize token
+		super token.position
+		@type = token.type
+		@value = token.value
+	end
+
+	def info
+		"unexpected #{@type.to_s.downcase} : '#{@value}'"
+	end
+end
