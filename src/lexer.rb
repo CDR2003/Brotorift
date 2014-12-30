@@ -35,7 +35,7 @@ class Lexer < RLTK::Lexer
 	rule(/'.+'/)					{ |t| [:STRING, t[1..-2]] }
 
 	# Identifier
-	rule(/[A-Za-z][A-Za-z0-9]*/)	{ |t| [:IDENT, t] }
+	rule(/[A-Za-z_][A-Za-z0-9_]*/)	{ |t| [:IDENT, t] }
 
 	# Document
 	rule(/#.*/)						{ |t| [:DOCUMENT, t[1..-1].strip] }
