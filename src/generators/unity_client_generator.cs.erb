@@ -35,7 +35,7 @@ namespace <%= node.namespace %>
 		<% end %>
 		public void ReadFromPacket( InPacket packet )
 		{<% for m in s.members %>
-			this.<%= m.name %> = <%= m.unity_read %><% end %>
+			this.<%= m.unity_read %><% end %>
 		}
 
 		public void WriteToPacket( OutPacket packet )
@@ -91,7 +91,7 @@ namespace <%= node.namespace %>
 			{<% for m in node_direction.in_direction.messages.values %>
 				case InMessage.<%= m.name %>:
 					{<% for p in m.members %>
-						<%= p.unity_read %><% end %>
+						var <%= p.unity_read %><% end %>
 						_handler.<%= m.name %>( <%= m.unity_param %> );
 					}
 					break;<% end %>

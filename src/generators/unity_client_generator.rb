@@ -50,12 +50,19 @@ class TypeInstanceDef
 	end
 
 	def unity_read is_top_scope
-		str = "packet.Read#{unity_read_write}"
-		if @params.empty?
-			str += '()'
+		str = ''
+		if @type.is_a? StructTypeDef
+			str = "packet.ReadStruct( new #{@type.name}() )"
+		elsif @type.is_a? EnumTypeDef
+			str = "(#{@type.name})packet.ReadInt()"
 		else
-			param_str = @params.map { |p| p.unity_read false } .join ', '
-			str += '( ' + param_str + ' )'
+			str = "packet.Read#{unity_read_write}"
+			if @params.empty?
+				str += '()'
+			else
+				param_str = @params.map { |p| p.unity_read false } .join ', '
+				str += '( ' + param_str + ' )'
+			end
 		end
 
 		if is_top_scope == false
@@ -66,17 +73,24 @@ class TypeInstanceDef
 	end
 
 	def unity_write member_name, is_top_scope
-		str = "packet.Write#{unity_read_write}"
-		if @params.empty?
-			str += "( #{member_name} )"
+		str = ''
+		if @type.is_a? StructTypeDef
+			str = "packet.WriteStruct( #{member_name} )"
+		elsif @type.is_a? EnumTypeDef
+			str = "packet.WriteInt( (int)#{member_name} )"
 		else
-			params_str = @params.map do |p|
-				@@lambda_index += 1
-				arg_name = '_' + @@lambda_index.to_s
-				p.unity_write arg_name, false
+			str = "packet.Write#{unity_read_write}"
+			if @params.empty?
+				str += "( #{member_name} )"
+			else
+				params_str = @params.map do |p|
+					@@lambda_index += 1
+					arg_name = '_' + @@lambda_index.to_s
+					p.unity_write arg_name, false
+				end
+				param_str = params_str.join ', '
+				str += '( ' + param_str + ' )'
 			end
-			param_str = params_str.join ', '
-			str += '( ' + param_str + ' )'
 		end
 
 		if is_top_scope == false
@@ -112,7 +126,7 @@ class MemberDef
 	end
 
 	def unity_read
-		"var #{@name} = #{@type.unity_read true};"
+		"#{@name} = #{@type.unity_read true};"
 	end
 
 	def unity_write
