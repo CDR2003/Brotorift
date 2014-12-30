@@ -21,11 +21,6 @@ namespace Brotorift
 			this.Header = _reader.ReadInt32();
 		}
 
-		public T1 Read<T1>( Func<T1> readFunc )
-		{
-			return readFunc();
-		}
-
 		public bool ReadBool()
 		{
 			return _reader.ReadBoolean();
@@ -63,7 +58,8 @@ namespace Brotorift
 
 		public string ReadString()
 		{
-			return _reader.ReadString();
+			var buffer = this.ReadByteBuffer();
+			return Encoding.UTF8.GetString( buffer );
 		}
 
 		public byte[] ReadByteBuffer()
@@ -107,17 +103,10 @@ namespace Brotorift
 			return map;
 		}
 
-		public T ReadStruct<T>() where T : IStruct, new()
+		public T ReadStruct<T>( T obj ) where T : IStruct
 		{
-			var value = new T();
-			value.ReadFromPacket( this );
-			return value;
-		}
-
-		public T ReadEnum<T>() where T : struct, IConvertible
-		{
-			object value = _reader.ReadInt32();
-			return (T)value;
+			obj.ReadFromPacket( this );
+			return obj;
 		}
 	}
 }

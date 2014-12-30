@@ -72,11 +72,13 @@ namespace Brotorift
 
 		public void WriteString( string value )
 		{
-			_writer.Write( value );
+			var buffer = Encoding.UTF8.GetBytes( value );
+			this.WriteByteBuffer( buffer );
 		}
 
 		public void WriteByteBuffer( byte[] value )
 		{
+			this.WriteInt( value.Length );
 			_writer.Write( value );
 		}
 
