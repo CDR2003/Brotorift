@@ -63,7 +63,7 @@ class Parser < RLTK::Parser
 		clause('IDENT LANGLE type_param_list RANGLE')				{ |name, _, params, _| TypeDecl.new self.position, name, params }
 	end
 
-	nonempty_list(:type_param_list, :IDENT, :COMMA)
+	nonempty_list(:type_param_list, :type, :COMMA)
 
 	production(:enum_decl) do
 		clause('ENUM IDENT doc element_list END')					{ |_, name, doc, elements, _| @@enum_value = 0; EnumDecl.new self.position, name, doc, elements }

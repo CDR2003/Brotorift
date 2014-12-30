@@ -7,8 +7,8 @@ namespace Brotorift
 {
 	public interface IStruct
 	{
-		void ReadFromPacket( Packet packet );
+		void ReadFromPacket( InPacket packet );
 
-		void WriteToPacket( Packet packet );
+		void WriteToPacket( OutPacket packet );
 	}
 }

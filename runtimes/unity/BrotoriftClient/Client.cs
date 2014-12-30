@@ -20,9 +20,9 @@ namespace Brotorift
 
 		private int _segmentSize;
 
-		private Queue<Packet> _packetsToReceive;
+		private Queue<InPacket> _packetsToReceive;
 
-		private Queue<Packet> _packetsToSend;
+		private Queue<OutPacket> _packetsToSend;
 
 		private Mutex _receivePacketsLock;
 
@@ -37,8 +37,8 @@ namespace Brotorift
 			_recvThread = new Thread( this.ReceiveLoop );
 			_recvBuffer = new MemoryStream();
 			_segmentSize = segmentSize;
-			_packetsToReceive = new Queue<Packet>();
-			_packetsToSend = new Queue<Packet>();
+			_packetsToReceive = new Queue<InPacket>();
+			_packetsToSend = new Queue<OutPacket>();
 			_receivePacketsLock = new Mutex();
 		}
 
@@ -133,7 +133,7 @@ namespace Brotorift
 
 				var content = reader.ReadBytes( packetSize );
 				_receivePacketsLock.WaitOne();
-				_packetsToReceive.Enqueue( new Packet( content ) );
+				_packetsToReceive.Enqueue( new InPacket( new MemoryStream( content ) ) );
 				_receivePacketsLock.ReleaseMutex();
 			}
 
@@ -144,12 +144,12 @@ namespace Brotorift
 			}
 		}
 
-		protected void SendPacket( Packet packet )
+		protected void SendPacket( OutPacket packet )
 		{
 			_packetsToSend.Enqueue( packet );
 		}
 
-		private bool DoSendPacket( Packet packet )
+		private bool DoSendPacket( OutPacket packet )
 		{
 			var stream = new MemoryStream();
 			var writer = new BinaryWriter( stream );
@@ -168,6 +168,6 @@ namespace Brotorift
 			return true;
 		}
 
-		protected abstract void ProcessPacket( Packet packet );
+		protected abstract void ProcessPacket( InPacket packet );
 	}
 }

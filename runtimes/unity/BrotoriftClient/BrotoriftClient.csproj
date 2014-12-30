@@ -39,9 +39,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BrotoriftClient.cs" />
-    <Compile Include="BrotoriftPacket.cs" />
-    <Compile Include="IBrotoriftStruct.cs" />
+    <Compile Include="Client.cs" />
+    <Compile Include="IStruct.cs" />
+    <Compile Include="InPacket.cs" />
+    <Compile Include="OutPacket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

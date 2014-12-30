@@ -50,12 +50,12 @@ namespace Fitbos.Chat
 		/// <param name="name">The nickname</param>
 		public void SetName( string name )
 		{
-			var packet = new Packet( (int)OutMessage.SetName );
+			var packet = new OutPacket( (int)OutMessage.SetName );
 			packet.WriteString( name );
 			this.SendPacket( packet );
 		}
 
-		protected override void ProcessPacket( Packet packet )
+		protected override void ProcessPacket( InPacket packet )
 		{
 			switch( (InMessage)packet.Header )
 			{

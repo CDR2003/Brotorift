@@ -85,7 +85,7 @@ class StructTypeDef < TypeDef
 end
 
 
-class MemberTypeDef < Def
+class TypeInstanceDef < Def
 	attr_reader :type, :params
 
 	def initialize ast, type, params

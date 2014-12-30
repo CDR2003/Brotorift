@@ -38,13 +38,52 @@ class StructTypeDef
 end
 
 
-class MemberTypeDef
+class TypeInstanceDef
+	@@lambda_index = 0
+
 	def unity
 		if @params.empty?
 			return @type.unity
 		else
 			return "#{@type.unity}#{unity_type_param}"
 		end
+	end
+
+	def unity_read is_top_scope
+		str = "packet.Read#{unity_read_write}"
+		if @params.empty?
+			str += '()'
+		else
+			param_str = @params.map { |p| p.unity_read false } .join ', '
+			str += '( ' + param_str + ' )'
+		end
+
+		if is_top_scope == false
+			str = '() => ' + str
+		end
+
+		str
+	end
+
+	def unity_write member_name, is_top_scope
+		str = "packet.Write#{unity_read_write}"
+		if @params.empty?
+			str += "( #{member_name} )"
+		else
+			params_str = @params.map do |p|
+				@@lambda_index += 1
+				arg_name = '_' + @@lambda_index.to_s
+				p.unity_write arg_name, false
+			end
+			param_str = params_str.join ', '
+			str += '( ' + param_str + ' )'
+		end
+
+		if is_top_scope == false
+			str = "( #{member_name} ) => " + str
+		end
+
+		str
 	end
 
 	def unity_read_write
@@ -73,11 +112,11 @@ class MemberDef
 	end
 
 	def unity_read
-		"packet.Read#{@type.unity_read_write}();"
+		"var #{@name} = #{@type.unity_read true};"
 	end
 
 	def unity_write
-		"packet.Write#{@type.unity_read_write}( #{@name} );"
+		"#{@type.unity_write @name, true};"
 	end
 end
 

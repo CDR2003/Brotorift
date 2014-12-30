@@ -67,11 +67,14 @@ end
 
 class TypeDecl < ASTNode
 	value :name, String
-	value :params, [String]
+	child :params, [TypeDecl]
 
 	def to_s
 		params_str = ''
-		params_str = '<' + params.join(', ') + '>' if params.length > 0
+		if params.length > 0
+			params_inner_str = params.map { |p| p.to_s } .join ','
+			params_str = '<' + params_inner_str + '>'
+		end
 		"#{name}#{params_str}"
 	end
 end

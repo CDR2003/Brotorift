@@ -197,38 +197,41 @@ class Compiler
 	end
 
 	def get_member_type member_type_ast
-		type_def = self.get_type member_type_ast, member_type_ast.name, true
+		type_def = self.get_type member_type_ast, true
+		return nil if type_def == nil
 
 		params = []
 		case type_def.name
 		when 'List'
 			self.check_type_param_count member_type_ast, 1
-			params.push self.get_type member_type_ast, member_type_ast.params[0], true
+			params.push self.get_member_type member_type_ast.params[0]
 		when 'Set'
 			self.check_type_param_count member_type_ast, 1
-			params.push self.get_type member_type_ast, member_type_ast.params[0], true
+			params.push self.get_member_type member_type_ast.params[0]
 		when 'Map'
 			self.check_type_param_count member_type_ast, 2
-			params.push self.get_type member_type_ast, member_type_ast.params[0], true
-			params.push self.get_type member_type_ast, member_type_ast.params[1], true
+			params.push self.get_member_type member_type_ast.params[0]
+			params.push self.get_member_type member_type_ast.params[1]
 		else
 			self.check_type_param_count member_type_ast, 0
 		end
 
-		MemberTypeDef.new member_type_ast, type_def, params
+		TypeInstanceDef.new member_type_ast, type_def, params
 	end
 
-	def get_type ast, name, raise_error
-		type_def = @runtime.builtins[name]
+	def get_type ast, raise_error
+		return nil if ast == nil
+		
+		type_def = @runtime.builtins[ast.name]
 		return type_def if type_def != nil
 
-		type_def = @runtime.enums[name]
+		type_def = @runtime.enums[ast.name]
 		return type_def if type_def != nil
 
-		type_def = @runtime.structs[name]
+		type_def = @runtime.structs[ast.name]
 		return type_def if type_def != nil
 
-		add_error TypeNotFoundError.new ast, name if raise_error
+		add_error TypeNotFoundError.new ast, ast.name if raise_error
 		return nil
 	end
 
@@ -241,7 +244,7 @@ class Compiler
 	end
 
 	def check_type_unique ast
-		type_def = self.get_type ast, ast.name, false
+		type_def = self.get_type ast, false
 		return if type_def == nil
 
 		if type_def.is_a? BuiltinTypeDef

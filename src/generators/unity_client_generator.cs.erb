@@ -33,19 +33,18 @@ namespace <%= node.namespace %>
 		/// </summary>
 		<%= m.unity_def %>
 		<% end %>
-		public void ReadFromPacket( Packet packet )
+		public void ReadFromPacket( InPacket packet )
 		{<% for m in s.members %>
 			this.<%= m.name %> = <%= m.unity_read %><% end %>
 		}
 
-		public void WriteToPacket( Packet packet )
+		public void WriteToPacket( OutPacket packet )
 		{<% for m in s.members %>
 			<%= m.unity_write %><% end %>
 		}
 	}
 	<% end %>
 	#endregion
-
 	<% for node_direction in runtime.get_node_directions node, :client %>
 	public class <%= node_direction.class_name %> : Client
 	{
@@ -74,7 +73,6 @@ namespace <%= node.namespace %>
 		{<% for m in node_direction.out_direction.messages.values %>
 			<%= m.name %> = <%= m.id %>,<% end %>
 		}
-
 		<% for m in node_direction.out_direction.messages.values %>
 		/// <summary>
 		/// <%= m.doc %>
@@ -82,18 +80,18 @@ namespace <%= node.namespace %>
 		<% for p in m.members %>/// <param name="<%= p.name %>"><%= p.doc %></param><% end %>
 		public <%= m.unity %>
 		{
-			var packet = new Packet( (int)OutMessage.<%= m.name %> );
+			var packet = new OutPacket( (int)OutMessage.<%= m.name %> );
 			<% for p in m.members %><%= p.unity_write %>
 			<% end %>this.SendPacket( packet );
 		}<% end %>
 
-		protected override void ProcessPacket( Packet packet )
+		protected override void ProcessPacket( InPacket packet )
 		{
 			switch( (InMessage)packet.Header )
 			{<% for m in node_direction.in_direction.messages.values %>
 				case InMessage.<%= m.name %>:
 					{<% for p in m.members %>
-						var <%= p.name %> = <%= p.unity_read %><% end %>
+						<%= p.unity_read %><% end %>
 						_handler.<%= m.name %>( <%= m.unity_param %> );
 					}
 					break;<% end %>
