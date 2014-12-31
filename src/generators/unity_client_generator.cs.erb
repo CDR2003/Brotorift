@@ -52,8 +52,8 @@ namespace <%= node.namespace %>
 		{<% for m in node_direction.in_direction.messages.values %>
 			/// <summary>
 			/// <%= m.doc %>
-			/// </summary>
-			<% for p in m.members %>/// <param name="<%= p.name %>"><%= p.doc %></param><% end %>
+			/// </summary><% for p in m.members %>
+			/// <param name="<%= p.name %>"><%= p.doc %></param><% end %>
 			<%= m.unity %>;
 		<% end %>}
 
@@ -76,8 +76,8 @@ namespace <%= node.namespace %>
 		<% for m in node_direction.out_direction.messages.values %>
 		/// <summary>
 		/// <%= m.doc %>
-		/// </summary>
-		<% for p in m.members %>/// <param name="<%= p.name %>"><%= p.doc %></param><% end %>
+		/// </summary><% for p in m.members %>
+		/// <param name="<%= p.name %>"><%= p.doc %></param><% end %>
 		public <%= m.unity %>
 		{
 			var packet = new OutPacket( (int)OutMessage.<%= m.name %> );

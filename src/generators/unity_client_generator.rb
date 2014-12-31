@@ -156,7 +156,7 @@ end
 
 class NodeDirection
 	def class_name
-		"#{@local.name}#{@remote.name}Connector"
+		"#{@remote.name}Connector"
 	end
 end
 
