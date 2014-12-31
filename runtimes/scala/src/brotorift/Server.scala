@@ -12,6 +12,11 @@ class Server extends Actor {
   def receive = {
     case Start(port) =>
       IO(Tcp)(context.system) ! Bind(self, new InetSocketAddress(port))
+      context become started
+  }
+  
+  def started: Receive = {
+    case CommandFailed(_: Bind) =>
       
   }
 }
