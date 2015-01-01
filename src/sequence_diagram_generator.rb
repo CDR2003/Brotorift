@@ -5,14 +5,17 @@ require 'open-uri'
 
 class SequenceDiagramGenerator
 	def self.generate runtime
+		index = 0
+		total = runtime.sequences.length
 		runtime.sequences.values.each do |sequence|
+			index += 1
+			puts "Generating sequence diagram [#{index}/#{total}]: #{sequence.name}.png"
 			generate_sequence sequence
 		end
 	end
 
 	def self.generate_sequence sequence
 		file = "docs/diagrams/#{sequence.name}.png"
-		puts 'Generating sequence diagram: ' + file
 		text = make_code sequence
 		response = Net::HTTP.post_form(URI.parse('http://www.websequencediagrams.com/index.php'), 'style' => 'omegapple', 'message' => text)
 		if response.body =~ /img: "(.+)"/

@@ -81,7 +81,7 @@ def generate_code runtime, node, side
 		return
 	end
 
-	puts "Generating code for #{node.language} #{side} for node '#{node.name}'..."
+	puts "Generating #{node.language} #{side} code for node '#{node.name}'..."
 	generator.generate node, runtime
 	if old_sides != nil
 		old_sides.push side
