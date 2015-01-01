@@ -35,7 +35,7 @@ namespace Fitbos.Chat
 
 		private enum InMessage
 		{
-			SetNameResult = 2002,
+			SetNameResult = 2001,
 		}
 
 		private enum OutMessage

@@ -8,12 +8,10 @@ import akka.util.ByteString
 import akka.util.ByteStringBuilder
 import java.nio.ByteOrder
 import akka.io.Tcp.Write
+import akka.io.Tcp.ConnectionClosed
 
 object Connection {
   val IntSize = 4
-  
-  case class OnOpen()
-  case class OnClose()
 }
 
 abstract class Connection(remote: ActorRef, address: InetSocketAddress) extends Actor {
@@ -51,7 +49,10 @@ abstract class Connection(remote: ActorRef, address: InetSocketAddress) extends 
   protected def sendPacket(packet: OutPacket) = {
     val bsb = new ByteStringBuilder()
     bsb.putInt(packet.length)
-    bsb.putBytes(packet.buffer.asByteBuffer.array)
+    
+    val buffer = packet.buffer.toArray
+    bsb.putBytes(buffer)
+    
     remote ! Write(bsb.result)
   }
   

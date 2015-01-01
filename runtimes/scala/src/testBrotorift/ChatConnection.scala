@@ -6,6 +6,7 @@ import java.net.InetSocketAddress
 import brotorift.OutPacket
 import brotorift.InPacket
 import brotorift.Struct
+import akka.io.Tcp.ConnectionClosed
 
 object Weekdays extends Enumeration {
   type Weekdays = Value
@@ -50,10 +51,10 @@ object ChatConnection {
 class ChatConnection(remote: ActorRef, address: InetSocketAddress, handler: ChatConnection.Handler) extends Connection(remote, address) {
   import ChatConnection._
   
+  handler.onOpen(self)
+  
   def processMessages: Receive = {
-    case Connection.OnOpen() =>
-      handler.onOpen(self)
-    case Connection.OnClose() =>
+    case _: ConnectionClosed =>
       handler.onClose(self)
       context.stop(self)
     case SetNameResult(result) =>
