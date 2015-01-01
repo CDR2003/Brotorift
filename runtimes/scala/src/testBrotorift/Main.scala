@@ -19,6 +19,8 @@ class Handler extends ChatConnection.Handler {
 }
 
 object Main extends App {
+  println(Weekdays.Tuesday.id)
+  
   val system = ActorSystem("chat")
   val service = system.actorOf(Props(classOf[ChatService], new Handler), "chatService")
   service ! Start(9000)

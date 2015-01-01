@@ -6,6 +6,21 @@ struct UserInfo
 	String password
 end
 
+enum Weekdays
+	Monday = 1
+	Tuesday
+	Wednesday
+	Thursday
+	Friday
+	Saturday
+	Sunday = 0
+end
+
+struct Test
+	List<Map<Int, String>> aaa
+	Weekdays day
+end
+
 enum YesNo
 	Yes
 	No
@@ -26,5 +41,8 @@ direction ChatClient <- ChatServer
 		Set<Set<String>> test
 		UserInfo info
 		YesNo yn
+	end
+
+	message AnotherMessage
 	end
 end

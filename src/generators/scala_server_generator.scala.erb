@@ -1,0 +1,104 @@
+package <%= node.namespace %>
+
+import brotorift._
+import java.net.InetSocketAddress
+import akka.actor.Props
+import akka.actor.ActorRef
+import akka.io.Tcp.ConnectionClosed
+
+<% for e in runtime.enums.values %>
+/** <%= e.doc %> */
+object <%= e.name %> extends Enumeration {
+  <% for v in e.elements.values %>
+  /** <%= v.doc %> */
+  val <%= v.name %> = Value(<%= v.value %>)
+<% end %>}
+<% end %>
+<% for s in runtime.structs.values %>
+/** <%= s.doc %> */
+class <%= s.name %> extends Struct {
+  <% for m in s.members %>
+  /** <%= m.doc %> */
+  var <%= m.name %>: <%= m.type.scala %> = _
+  <% end %>
+  
+  override def readFromPacket(packet: InPacket) = {<% for m in s.members %>
+    <%= m.name %> = <%= m.scala_read %><% end %>
+  }
+  
+  override def writeToPacket(packet: OutPacket) = {<% for m in s.members %>
+    <%= m.scala_write %><% end %>
+  }
+}
+<% end %>
+<% for n in runtime.get_node_directions node, :server %>
+class <%= n.service_name %>(handler: <%= n.connection_name %>.Handler) extends Service {
+  override def createConnection(remote: ActorRef, address: InetSocketAddress) = {
+    context.actorOf(Props(classOf[<%= n.connection_name %>], remote, address, handler))
+  }
+}
+<% end %>
+<% for n in runtime.get_node_directions node, :server %>
+object <%= n.connection_name %> {
+  private object InMessage {<% for m in n.in_direction.messages.values %>
+    val <%= m.name %> = <%= m.id %><% end %>
+  }
+  
+  private object OutMessage {<% for m in n.out_direction.messages.values %>
+    val <%= m.name %> = <%= m.id %><% end %>
+  }
+  
+  trait Handler {
+    <% for m in n.in_direction.messages.values %>
+    /** Triggers when the connection opened
+     * 
+     *  @param connection The incoming connection
+     */
+    def onOpen(connection: ActorRef)
+    
+    /** Triggers when the connection closed
+     *  
+     *  @param connection The closed connection
+     */
+    def onClose(connection: ActorRef)
+    
+    /** <%= m.doc %>
+     *  
+     *  @param connection The message sender<% for p in m.members %>
+     *  @param <%= p.name %> <%= p.doc %><% end %>
+     */
+    def <%= m.scala_method %>(connection: ActorRef<% for p in m.members %>, <%= p.name %>: <%= p.type.scala %><% end %>)<% end %>
+  }
+  <% for m in n.out_direction.messages.values %>
+  /** <%= m.doc %>
+   *  <% for p in m.members %>
+   *  @param <%= p.name %> <%= p.doc %><% end %>
+   */
+  case class <%= m.name %>(<% for p in m.members %>, <%= p.name %>: <%= p.type.scala %><% end %>)
+<% end %>}
+<% end %>
+<% for n in runtime.get_node_directions node, :server %>
+class <%= n.connection_name %>(remote: ActorRef, address: InetSocketAddress, handler: <%= n.connection_name %>.Handler) extends Connection(remote, address) {
+  import <%= n.connection_name %>._
+  
+  handler.onOpen(self)
+  
+  def processMessages: Receive = {
+    case _: ConnectionClosed =>
+      handler.onClose(self)
+      context.stop(self)<% for m in n.out_direction.messages.values %>
+    case <%= m.name %>(<%= m.members.map { |p| p.name } .join ', ' %>) =>
+      val packet = new OutPacket(OutMessage.<%= m.name %>)<% for p in m.members %>
+      <%= p.scala_write %><% end %>
+      this.sendPacket(packet)<% end %>
+  }
+  
+  def processPacket(packet: InPacket) = {
+    packet.header match {<% for m in n.out_direction.messages.values %>
+      case InMessage.<%= m.name %> =><% for p in m.members %>
+        val <%= p.name %> = <%= p.scala_read %><% end %>
+        handler.<%= m.scala_method %>(self<% for p in m.members %>, <%= p.name %><% end %>)<% end %>
+    }
+  }
+}
+<% end %>

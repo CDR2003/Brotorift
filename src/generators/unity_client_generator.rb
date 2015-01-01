@@ -89,7 +89,7 @@ class TypeInstanceDef
 					p.unity_write arg_name, false
 				end
 				param_str = params_str.join ', '
-				str += '( ' + param_str + ' )'
+				str += "( #{member_name}, #{param_str} )"
 			end
 		end
 
