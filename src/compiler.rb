@@ -29,7 +29,8 @@ class Compiler
 	end
 
 	def compile_file runtime, filename
-		tokens = Lexer::lex_file filename
+		content = File.read filename, encoding: 'utf-8'
+		tokens = Lexer::lex content, filename
 		begin
 			ast = Parser::parse tokens
 		rescue RLTK::NotInLanguage => e

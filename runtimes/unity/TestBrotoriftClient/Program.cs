@@ -1,5 +1,4 @@
 ﻿using Brotorift;
-using Fitbos.Chat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,24 +7,42 @@ using System.Threading.Tasks;
 
 namespace TestBrotoriftClient
 {
-	class Handler : ClientChatServerConnector.IHandler
+	class Handler : ChatServerConnector.IHandler
 	{
-		public void SetNameResult( bool succeeded )
+
+		public void RespondLogin( LoginResult result )
+		{
+			Console.WriteLine( result );
+		}
+
+		public void RespondRegister( RegisterResult result )
 		{
 			throw new NotImplementedException();
 		}
 	}
 
-
 	class Program
 	{
 		static void Main( string[] args )
 		{
-			var client = new ClientChatServerConnector( new Handler() );
+			var client = new ChatServerConnector( new Handler() );
 			client.Connect( "localhost", 9000 );
-			client.SetName( "Fitbos" );
 
-			client.Update();
+			var info = new UserInfo();
+			info.username = "Fitbos";
+			info.password = "123";
+			client.RequestLogin( info );
+
+			for( ; ; )
+			{
+				var result = client.Update();
+				if( result == false )
+				{
+					break;
+				}
+			}
+
+			Console.WriteLine( "Connection lost." );
 			Console.ReadKey();
 		}
 	}

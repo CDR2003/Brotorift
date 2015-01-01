@@ -1,5 +1,6 @@
 require 'colorize'
 require './compiler'
+require './sequence_diagram_generator'
 
 
 if ARGV.length < 1
@@ -55,6 +56,18 @@ def generate_all_code runtime
 		generate_code runtime, direction.client, :client
 		generate_code runtime, direction.server, :server
 	end
+
+	generate_sequence_diagrams runtime
+end
+
+
+def generate_sequence_diagrams runtime
+	begin
+		Dir.mkdir 'docs'
+		Dir.mkdir 'docs/diagrams'
+	rescue
+	end
+	SequenceDiagramGenerator.generate runtime
 end
 
 

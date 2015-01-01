@@ -49,7 +49,7 @@ object <%= n.connection_name %> {
   }
   
   trait Handler {
-    <% for m in n.in_direction.messages.values %>
+
     /** Triggers when the connection opened
      * 
      *  @param connection The incoming connection
@@ -61,20 +61,20 @@ object <%= n.connection_name %> {
      *  @param connection The closed connection
      */
     def onClose(connection: ActorRef)
-    
+    <% for m in n.in_direction.messages.values %>
     /** <%= m.doc %>
      *  
      *  @param connection The message sender<% for p in m.members %>
      *  @param <%= p.name %> <%= p.doc %><% end %>
      */
-    def <%= m.scala_method %>(connection: ActorRef<% for p in m.members %>, <%= p.name %>: <%= p.type.scala %><% end %>)<% end %>
-  }
+    def <%= m.scala_method %>(connection: ActorRef<% for p in m.members %>, <%= p.name %>: <%= p.type.scala %><% end %>)
+  <% end %>}
   <% for m in n.out_direction.messages.values %>
   /** <%= m.doc %>
    *  <% for p in m.members %>
    *  @param <%= p.name %> <%= p.doc %><% end %>
    */
-  case class <%= m.name %>(<% for p in m.members %>, <%= p.name %>: <%= p.type.scala %><% end %>)
+  case class <%= m.name %>(<%= m.members.map { |p| p.name + ': ' + p.type.scala } .join ', ' %>)
 <% end %>}
 <% end %>
 <% for n in runtime.get_node_directions node, :server %>
@@ -94,7 +94,7 @@ class <%= n.connection_name %>(remote: ActorRef, address: InetSocketAddress, han
   }
   
   def processPacket(packet: InPacket) = {
-    packet.header match {<% for m in n.out_direction.messages.values %>
+    packet.header match {<% for m in n.in_direction.messages.values %>
       case InMessage.<%= m.name %> =><% for p in m.members %>
         val <%= p.name %> = <%= p.scala_read %><% end %>
         handler.<%= m.scala_method %>(self<% for p in m.members %>, <%= p.name %><% end %>)<% end %>

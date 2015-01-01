@@ -99,12 +99,11 @@ namespace Brotorift
 					if( bytesRead > 0 )
 					{
 						var currentPosition = 0;
-						_recvBuffer.Write( segment, currentPosition, bytesRead );
-						currentPosition += bytesRead;
+						_recvBuffer.Write( segment, 0, bytesRead );
 						while( bytesRead == _segmentSize && _stream.DataAvailable )
 						{
 							bytesRead = _stream.Read( segment, 0, _segmentSize );
-							_recvBuffer.Write( segment, currentPosition, bytesRead );
+							_recvBuffer.Write( segment, 0, bytesRead );
 							currentPosition += bytesRead;
 						}
 					}
@@ -121,6 +120,7 @@ namespace Brotorift
 
 		private void PushPackets()
 		{
+			_recvBuffer.Position = 0;
 			while( _recvBuffer.Length > sizeof( int ) )
 			{
 				var reader = new BinaryReader( _recvBuffer );
