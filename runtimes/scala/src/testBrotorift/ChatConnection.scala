@@ -39,7 +39,9 @@ object ChatConnection {
   }
   
   trait Handler {
-    def SetName(name: String)
+    def onOpen(connection: ActorRef)
+    def onClose(connection: ActorRef)
+    def setName(connection: ActorRef, name: String)
   }
   
   case class SetNameResult(result: Boolean)
@@ -49,6 +51,11 @@ class ChatConnection(remote: ActorRef, address: InetSocketAddress, handler: Chat
   import ChatConnection._
   
   def processMessages: Receive = {
+    case Connection.OnOpen() =>
+      handler.onOpen(self)
+    case Connection.OnClose() =>
+      handler.onClose(self)
+      context.stop(self)
     case SetNameResult(result) =>
       val packet = new OutPacket(OutMessage.SetNameResult)
       packet.writeBool(result)
@@ -59,7 +66,7 @@ class ChatConnection(remote: ActorRef, address: InetSocketAddress, handler: Chat
     packet.header match {
       case InMessage.SetName =>
         val name = packet.readString()
-        handler.SetName(name)
+        handler.setName(self, name)
     }
   }
 }

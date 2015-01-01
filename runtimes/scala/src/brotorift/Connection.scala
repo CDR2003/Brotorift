@@ -11,6 +11,9 @@ import akka.io.Tcp.Write
 
 object Connection {
   val IntSize = 4
+  
+  case class OnOpen()
+  case class OnClose()
 }
 
 abstract class Connection(remote: ActorRef, address: InetSocketAddress) extends Actor {

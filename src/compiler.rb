@@ -127,6 +127,7 @@ class Compiler
 		end
 
 		@message_base_id += 1000
+		@message_id = 0
 
 		old_direction = @runtime.get_direction client, direction_ast.direction, server
 		self.check_unique 'direction', old_direction, direction_ast
