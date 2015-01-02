@@ -1,0 +1,139 @@
+# [PackageDev] target_format: plist, ext: tmLanguage
+---
+name: Brotorift
+scopeName: source.b
+fileTypes: [b]
+uuid: 539d865e-661d-4270-a3fc-84fee84d2518
+
+patterns:
+- comment: node
+  name: meta.node.brotorift
+  match: \b(node)\s+(unity|scala)\s+([A-Za-z_][A-Za-z0-9_]*)
+  captures:
+    '1': {name: keyword.node.brotorift}
+    '2': {name: support.constant.language.brotorift}
+    '3': {name: entity.name.type.node.brotorift}
+- comment: as
+  name: meta.as.brotorift
+  match: \b(as)\s+([A-Z][A-Za-z0-9_]*)
+  captures:
+    '1': {name: keyword.as.brotorift}
+    '2': {name: entity.name.type.node.brotorift}
+- comment: namespace
+  name: meta.namespace.brotorift
+  match: \b(namespace)\s+([A-Za-z_][A-Za-z0-9_]*)(.[A-Za-z_][A-Za-z0-9_]*)*
+  captures:
+    '1': {name: keyword.namespace.brotorift}
+    '2': {name: entity.name.type.namespace.head.brotorift}
+    '3': {name: entity.name.type.namespace.tail.brotorift}
+- comment: document
+  name: comment.line.number-sign.node.brotorift
+  match: \#.*
+- comment: enum
+  name: meta.enum.brotorift
+  begin: \b(enum)\s+([A-Z][A-Za-z0-9_]*)
+  beginCaptures:
+    '1': {name: keyword.enum.brotorift}
+    '2': {name: entity.name.type.enum.brotorift}
+  end: \b(end)
+  endCaptures:
+    '1': {name: keyword.end.brotorift}
+  patterns:
+  - comment: enum element
+    name: meta.element.brotorift
+    match: \b([A-Z][A-Za-z0-9_]*)
+    captures:
+      '1': {name: support.constant.element.brotorift}
+  - comment: enum value (hexadecimal)
+    name: meta.element.value.brotorift
+    match: =\s*(0[xX][0-9a-fA-F]+)
+    captures:
+      '1': {name: constant.numeric.hexadecimal.brotorift}
+  - comment: enum value (decimal)
+    name: meta.element.value.brotorift
+    match: =\s*((\+|-)?\d+)
+    captures:
+      '1': {name: constant.numeric.decimal.brotorift}
+  - comment: document
+    name: comment.line.number-sign.enum.brotorift
+    match: \#.*
+- comment: struct
+  name: meta.struct.brotorift
+  begin: \b(struct)\s+([A-Za-z_][A-Za-z0-9_]*)
+  beginCaptures:
+    '1': {name: keyword.struct.brotorift}
+    '2': {name: entity.name.type.struct.brotorift}
+  end: \b(end)
+  endCaptures:
+    '1': {name: keyword.end.brotorift}
+  patterns:
+  - comment: struct member type
+    name: meta.member.brotorift
+    match: \b([A-Z][A-Za-z0-9_]*)
+    captures:
+      '1': {name: support.constant.member.type.brotorift}
+  - comment: struct member name
+    name: meta.member.brotorift
+    match: \b([a-z_][A-Za-z0-9_]*)
+    captures:
+      '1': {name: entity.name.member.brotorift}
+  - comment: document
+    name: comment.line.number-sign.struct.brotorift
+    match: \#.*
+- comment: direction
+  name: meta.direction.brotorift
+  begin: \b(direction)\s+([A-Z][A-Za-z0-9_]*)\s*(->|<-)\s*([A-Z][A-Za-z0-9_]*)
+  beginCaptures:
+    '1': {name: keyword.direction.brotorift}
+    '2': {name: entity.name.type.node.brotorift}
+    '3': {name: keyword.operator.brotorift}
+    '4': {name: entity.name.type.node.brotorift}
+  end: \b(end)
+  endCaptures:
+    '1': {name: keyword.end.brotorift}
+  patterns:
+  - comment: message
+    name: meta.message.brotorift
+    begin: \b(message)\s+([A-Z][A-Za-z0-9_]*)
+    beginCaptures:
+      '1': {name: keyword.message.brotorift}
+      '2': {name: entity.name.function.message.brotorift}
+    end: \b(end)
+    endCaptures:
+      '1': {name: keyword.end.brotorift}
+    patterns:
+    - comment: message member type
+      name: meta.member.brotorift
+      match: \b([A-Z][A-Za-z0-9_]*)
+      captures:
+        '1': {name: support.constant.member.type.brotorift}
+    - comment: message member name
+      name: meta.member.brotorift
+      match: \b([a-z_][A-Za-z0-9_]*)
+      captures:
+        '1': {name: entity.name.member.brotorift}
+    - comment: document
+      name: comment.line.number-sign.message.brotorift
+      match: \#.*
+- comment: sequence
+  name: meta.sequence.brotorift
+  begin: \b(sequence)\s+([A-Z][A-Za-z0-9_]*)
+  beginCaptures:
+    '1': {name: keyword.sequence.brotorift}
+    '2': {name: entity.name.section.brotorift}
+  end: \b(end)
+  endCaptures:
+    '1': {name: keyword.end.brotorift}
+  patterns:
+  - comment: step
+    name: meta.step.brotorift
+    match: ([A-Z][A-Za-z0-9_]*)\s*(->|<-)\s*([A-Z][A-Za-z0-9_]*)\s*:\s*([A-Z][A-Za-z0-9_]*)
+    captures:
+      '1': {name: entity.name.type.node.brotorift}
+      '2': {name: keyword.operator.brotorift}
+      '3': {name: entity.name.type.node.brotorift}
+      '4': {name: entity.name.function.message.brotorift}
+  - comment: document
+    name: comment.line.number-sign.message.brotorift
+    match: \#.*
+...

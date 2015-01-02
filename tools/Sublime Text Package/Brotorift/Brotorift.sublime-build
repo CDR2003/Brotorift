@@ -1,0 +1,5 @@
+{
+	"cmd": ["ruby", "F:\\Brotorift\\src\\brotorift.rb", "$file"],
+	"file_regex": "^(...*?):([0-9]*):?([0-9]*)",
+	"selector": "source.b"
+}

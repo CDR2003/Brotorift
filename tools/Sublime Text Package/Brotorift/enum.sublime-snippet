@@ -1,0 +1,8 @@
+<snippet>
+	<content><![CDATA[enum ${1:EnumType}
+	${2:EnumValue}
+end]]></content>
+    <tabTrigger>enum</tabTrigger>
+    <scope>source.b</scope>
+    <description>enum</description>
+</snippet>

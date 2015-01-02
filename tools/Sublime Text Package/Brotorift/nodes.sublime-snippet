@@ -1,0 +1,6 @@
+<snippet>
+	<content><![CDATA[node ${1:unity} ${2:Client} as ${3:C} namespace ${4:Client}]]></content>
+    <tabTrigger>nodec</tabTrigger>
+    <scope>source.b</scope>
+    <description>node for client</description>
+</snippet>

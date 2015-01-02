@@ -29,7 +29,7 @@ class Lexer < RLTK::Lexer
 
 	# Number
 	rule(/(\+|-)?\d+/)				{ |t| [:NUMBER, t.to_i] }
-	rule(/0x\d+/)					{ |t| [:NUMBER, t.hex] }
+	rule(/0[xX][0-9a-fA-F]+/)		{ |t| [:NUMBER, t.hex] }
 
 	# String
 	rule(/'.+'/)					{ |t| [:STRING, t[1..-2]] }

@@ -1,0 +1,8 @@
+<snippet>
+	<content><![CDATA[sequence ${1:SequenceName}
+	${2}
+end]]></content>
+    <tabTrigger>sequence</tabTrigger>
+    <scope>source.b</scope>
+    <description>sequence</description>
+</snippet>

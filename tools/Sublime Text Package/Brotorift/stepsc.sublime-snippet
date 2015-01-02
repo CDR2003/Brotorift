@@ -1,0 +1,6 @@
+<snippet>
+	<content><![CDATA[${1:C} <- ${2:S}: ${3:MessageName}]]></content>
+    <tabTrigger>stepsc</tabTrigger>
+    <scope>source.b</scope>
+    <description><![CDATA[c <- s: msg]]></description>
+</snippet>

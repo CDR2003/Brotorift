@@ -1,0 +1,8 @@
+<snippet>
+	<content><![CDATA[direction ${1:Client} -> ${2:Server}
+	${3}
+end]]></content>
+    <tabTrigger>dircs</tabTrigger>
+    <scope>source.b</scope>
+    <description>direction c -> s</description>
+</snippet>

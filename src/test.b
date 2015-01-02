@@ -1,23 +1,23 @@
-node unity ChatClient as C namespace TestBrotoriftClient
+node unity ChatClient as C namespace TestBrotoriftClient	# 客户端
 node scala ChatServer as S namespace testBrotorift
 
 
-enum LoginResult		# 登录结果
-	Succeeded			# 成功
-	InvalidUsername		# 用户名不存在
-	InvalidPassword		# 密码错误
+enum LoginResult				# 登录结果
+	Succeeded					# 成功
+	InvalidUsername				# 用户名不存在
+	InvalidPassword				# 密码错误
 end
 
 
-enum RegisterResult		# 注册结果
-	Succeeded			# 成功
-	DuplicateUsername	# 重复用户名已存在
+enum RegisterResult				# 注册结果
+	Succeeded					# 成功
+	DuplicateUsername			# 重复用户名已存在
 end
 
 
-struct UserInfo			# 用户信息
-	String username		# 用户名
-	String password		# 密码
+struct UserInfo					# 用户信息
+	String username				# 用户名
+	String password				# 密码
 end
 
 
@@ -53,3 +53,4 @@ sequence Login					# 登录流程
 	C -> S: RequestLogin		# 登录请求
 	C <- S: RespondLogin		# 登录回复
 end
+

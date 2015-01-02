@@ -1,0 +1,8 @@
+<snippet>
+	<content><![CDATA[message ${1:MessageName}
+	${2:MemberType} ${3:memberName}
+end]]></content>
+    <tabTrigger>message</tabTrigger>
+    <scope>source.b</scope>
+    <description>message</description>
+</snippet>
