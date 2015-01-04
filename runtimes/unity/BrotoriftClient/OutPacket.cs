@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace Brotorift
 {
@@ -113,6 +114,19 @@ namespace Brotorift
 		public void WriteStruct( IStruct value )
 		{
 			value.WriteToPacket( this );
+		}
+
+		public void WriteVector2( Vector2 value )
+		{
+			this.WriteFloat( value.x );
+			this.WriteFloat( value.y );
+		}
+
+		public void WriteVector3( Vector3 value )
+		{
+			this.WriteFloat( value.x );
+			this.WriteFloat( value.y );
+			this.WriteFloat( value.z );
 		}
 	}
 }

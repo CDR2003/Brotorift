@@ -21,20 +21,17 @@ class <%= s.name %> extends Struct {
   /** <%= m.doc %> */
   var <%= m.name %>: <%= m.type.scala %> = _
   <% end %>
-  
+  def this(<%= s.members.map { |m| m.name + ': ' + m.type.scala } .join ', ' %>) = {
+    this()<% for m in s.members %>
+    this.<%= m.name %> = <%= m.name %><% end %>
+  }
+
   override def readFromPacket(packet: InPacket) = {<% for m in s.members %>
     <%= m.name %> = <%= m.scala_read %><% end %>
   }
   
   override def writeToPacket(packet: OutPacket) = {<% for m in s.members %>
     <%= m.scala_write %><% end %>
-  }
-}
-<% end %>
-<% for n in runtime.get_node_directions node, :server %>
-class <%= n.service_name %>(handler: <%= n.connection_name %>.Handler) extends Service {
-  override def createConnection(remote: ActorRef, address: InetSocketAddress) = {
-    context.actorOf(Props(classOf[<%= n.connection_name %>], remote, address, handler))
   }
 }
 <% end %>
@@ -47,28 +44,6 @@ object <%= n.connection_name %> {
   private object OutMessage {<% for m in n.out_direction.messages.values %>
     val <%= m.name %> = <%= m.id %><% end %>
   }
-  
-  trait Handler {
-
-    /** Triggers when the connection opened
-     * 
-     *  @param connection The incoming connection
-     */
-    def onOpen(connection: ActorRef)
-    
-    /** Triggers when the connection closed
-     *  
-     *  @param connection The closed connection
-     */
-    def onClose(connection: ActorRef)
-    <% for m in n.in_direction.messages.values %>
-    /** <%= m.doc %>
-     *  
-     *  @param connection The message sender<% for p in m.members %>
-     *  @param <%= p.name %> <%= p.doc %><% end %>
-     */
-    def <%= m.scala_method %>(connection: ActorRef<% for p in m.members %>, <%= p.name %>: <%= p.type.scala %><% end %>)
-  <% end %>}
   <% for m in n.out_direction.messages.values %>
   /** <%= m.doc %>
    *  <% for p in m.members %>
@@ -78,14 +53,14 @@ object <%= n.connection_name %> {
 <% end %>}
 <% end %>
 <% for n in runtime.get_node_directions node, :server %>
-class <%= n.connection_name %>(remote: ActorRef, address: InetSocketAddress, handler: <%= n.connection_name %>.Handler) extends Connection(remote, address) {
+abstract class <%= n.connection_name %>(remote: ActorRef, address: InetSocketAddress) extends Connection(remote, address) {
   import <%= n.connection_name %>._
   
-  handler.onOpen(self)
+  this.onOpen(self)
   
   def processMessages: Receive = {
     case _: ConnectionClosed =>
-      handler.onClose(self)
+      this.onClose(self)
       context.stop(self)<% for m in n.out_direction.messages.values %>
     case <%= m.name %>(<%= m.members.map { |p| p.name } .join ', ' %>) =>
       val packet = new OutPacket(OutMessage.<%= m.name %>)<% for p in m.members %>
@@ -97,8 +72,27 @@ class <%= n.connection_name %>(remote: ActorRef, address: InetSocketAddress, han
     packet.header match {<% for m in n.in_direction.messages.values %>
       case InMessage.<%= m.name %> =><% for p in m.members %>
         val <%= p.name %> = <%= p.scala_read %><% end %>
-        handler.<%= m.scala_method %>(self<% for p in m.members %>, <%= p.name %><% end %>)<% end %>
+        this.<%= m.scala_method %>(self<% for p in m.members %>, <%= p.name %><% end %>)<% end %>
     }
   }
-}
+
+  /** Triggers when the connection opened
+   * 
+   *  @param connection The incoming connection
+   */
+  def onOpen(connection: ActorRef)
+  
+  /** Triggers when the connection closed
+   *  
+   *  @param connection The closed connection
+   */
+  def onClose(connection: ActorRef)
+  <% for m in n.in_direction.messages.values %>
+  /** <%= m.doc %>
+   *  
+   *  @param connection The message sender<% for p in m.members %>
+   *  @param <%= p.name %> <%= p.doc %><% end %>
+   */
+  def <%= m.scala_method %>(connection: ActorRef<% for p in m.members %>, <%= p.name %>: <%= p.type.scala %><% end %>)
+<% end %>}
 <% end %>

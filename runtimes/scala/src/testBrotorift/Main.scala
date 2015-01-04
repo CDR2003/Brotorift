@@ -2,6 +2,7 @@ package testBrotorift
 
 import akka.actor._
 import brotorift._
+import java.net.InetSocketAddress
 
 case class Register(connection: ActorRef, info: UserInfo)
 case class Login(connection: ActorRef, info: UserInfo)
@@ -33,7 +34,7 @@ class UserCenter extends Actor {
 }
 
 
-class MyHandler(userCenter: ActorRef) extends ChatClientConnection.Handler {
+class ChatClientConnectionImpl(remote: ActorRef, address: InetSocketAddress, userCenter: ActorRef) extends ChatClientConnection(remote, address) {
   /** Triggers when the connection opened
    * 
    *  @param connection The incoming connection
@@ -70,9 +71,16 @@ class MyHandler(userCenter: ActorRef) extends ChatClientConnection.Handler {
 }
 
 
+class ChatClientConnectionFactory(userCenter: ActorRef) extends ConnectionFactory {
+  def getConnectionProps(remote: ActorRef, address: InetSocketAddress) = {
+    Props(classOf[ChatClientConnectionImpl], remote, address, userCenter)
+  }
+}
+
+
 object Main extends App {
   val system = ActorSystem("chat")
   val userCenter = system.actorOf(Props[UserCenter], "userCenter")
-  val service = system.actorOf(Props(classOf[ChatClientService], new MyHandler(userCenter)), "chatService")
+  val service = system.actorOf(Props(classOf[Service], new ChatClientConnectionFactory(userCenter)), "chatService")
   service ! Start(9000)
 }

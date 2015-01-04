@@ -33,6 +33,11 @@ namespace <%= node.namespace %>
 		/// </summary>
 		<%= m.unity_def %>
 		<% end %>
+		public <%= s.name %>( <%= s.members.map { |m| m.unity_param } .join ', ' %> )
+		{<% for m in s.members %>
+			this.<%= m.name %> = <%= m.name %>;<% end %>
+		}
+
 		public void ReadFromPacket( InPacket packet )
 		{<% for m in s.members %>
 			this.<%= m.unity_read %><% end %>

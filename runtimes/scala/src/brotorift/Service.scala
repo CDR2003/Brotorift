@@ -8,7 +8,7 @@ import akka.actor.ActorRef
 
 case class Start(port: Int)
 
-abstract class Service extends Actor {
+class Service(factory: ConnectionFactory) extends Actor {
   import Tcp._
   
   def receive = {
@@ -22,9 +22,8 @@ abstract class Service extends Actor {
       println("Bind failed")
       context.stop(self)
     case Connected(address, _) =>
-      val connection = this.createConnection(sender, address)
+      val props = factory.getConnectionProps(sender, address)
+      val connection = context.actorOf(props)
       sender ! Register(connection)
   }
-  
-  def createConnection(remote: ActorRef, address: InetSocketAddress): ActorRef
 }

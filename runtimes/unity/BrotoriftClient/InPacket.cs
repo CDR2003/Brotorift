@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace Brotorift
 {
@@ -107,6 +108,21 @@ namespace Brotorift
 		{
 			obj.ReadFromPacket( this );
 			return obj;
+		}
+
+		public Vector2 ReadVector2()
+		{
+			var x = this.ReadFloat();
+			var y = this.ReadFloat();
+			return new Vector2( x, y );
+		}
+
+		public Vector3 ReadVector3()
+		{
+			var x = this.ReadFloat();
+			var y = this.ReadFloat();
+			var z = this.ReadFloat();
+			return new Vector3( x, y, z );
 		}
 	}
 }

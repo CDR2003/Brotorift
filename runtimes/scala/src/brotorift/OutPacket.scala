@@ -79,4 +79,15 @@ class OutPacket(header: Int) {
   def writeStruct(value: Struct) = {
     value.writeToPacket(this)
   }
+  
+  def writeVector2(value: Vector2) = {
+    this.writeFloat(value.x)
+    this.writeFloat(value.y)
+  }
+  
+  def writeVector3(value: Vector3) = {
+    this.writeFloat(value.x)
+    this.writeFloat(value.y)
+    this.writeFloat(value.z)
+  }
 }

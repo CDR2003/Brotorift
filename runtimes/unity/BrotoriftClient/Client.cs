@@ -121,7 +121,7 @@ namespace Brotorift
 		private void PushPackets()
 		{
 			_recvBuffer.Position = 0;
-			while( _recvBuffer.Length > sizeof( int ) )
+			while( _recvBuffer.Length - _recvBuffer.Position > sizeof( int ) )
 			{
 				var reader = new BinaryReader( _recvBuffer );
 				var packetSize = reader.ReadInt32();

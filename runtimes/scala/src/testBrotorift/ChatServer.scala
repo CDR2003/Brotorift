@@ -40,7 +40,12 @@ class UserInfo extends Struct {
   /** 密码 */
   var password: String = _
   
-  
+  def this(username: String, password: String) = {
+    this()
+    this.username = username
+    this.password = password
+  }
+
   override def readFromPacket(packet: InPacket) = {
     username = packet.readString()
     password = packet.readString()
@@ -49,13 +54,6 @@ class UserInfo extends Struct {
   override def writeToPacket(packet: OutPacket) = {
     packet.writeString(username)
     packet.writeString(password)
-  }
-}
-
-
-class ChatClientService(handler: ChatClientConnection.Handler) extends Service {
-  override def createConnection(remote: ActorRef, address: InetSocketAddress) = {
-    context.actorOf(Props(classOf[ChatClientConnection], remote, address, handler))
   }
 }
 
@@ -69,34 +67,6 @@ object ChatClientConnection {
   private object OutMessage {
     val RespondLogin = 2001
     val RespondRegister = 2002
-  }
-  
-  trait Handler {
-
-    /** Triggers when the connection opened
-     * 
-     *  @param connection The incoming connection
-     */
-    def onOpen(connection: ActorRef)
-    
-    /** Triggers when the connection closed
-     *  
-     *  @param connection The closed connection
-     */
-    def onClose(connection: ActorRef)
-    
-    /** 请求登录
-     *  
-     *  @param connection The message sender
-     *  @param info 登录时填写的用户信息
-     */
-    def requestLogin(connection: ActorRef, info: UserInfo)
-    /** 请求注册
-     *  
-     *  @param connection The message sender
-     *  @param info 注册时填写的用户信息
-     */
-    def requestRegister(connection: ActorRef, info: UserInfo)
   }
   
   /** 回复登录请求
@@ -113,14 +83,14 @@ object ChatClientConnection {
 }
 
 
-class ChatClientConnection(remote: ActorRef, address: InetSocketAddress, handler: ChatClientConnection.Handler) extends Connection(remote, address) {
+abstract class ChatClientConnection(remote: ActorRef, address: InetSocketAddress) extends Connection(remote, address) {
   import ChatClientConnection._
   
-  handler.onOpen(self)
+  this.onOpen(self)
   
   def processMessages: Receive = {
     case _: ConnectionClosed =>
-      handler.onClose(self)
+      this.onClose(self)
       context.stop(self)
     case RespondLogin(result) =>
       val packet = new OutPacket(OutMessage.RespondLogin)
@@ -136,10 +106,36 @@ class ChatClientConnection(remote: ActorRef, address: InetSocketAddress, handler
     packet.header match {
       case InMessage.RequestLogin =>
         val info = packet.readStruct(new UserInfo)
-        handler.requestLogin(self, info)
+        this.requestLogin(self, info)
       case InMessage.RequestRegister =>
         val info = packet.readStruct(new UserInfo)
-        handler.requestRegister(self, info)
+        this.requestRegister(self, info)
     }
   }
+
+  /** Triggers when the connection opened
+   * 
+   *  @param connection The incoming connection
+   */
+  def onOpen(connection: ActorRef)
+  
+  /** Triggers when the connection closed
+   *  
+   *  @param connection The closed connection
+   */
+  def onClose(connection: ActorRef)
+  
+  /** 请求登录
+   *  
+   *  @param connection The message sender
+   *  @param info 登录时填写的用户信息
+   */
+  def requestLogin(connection: ActorRef, info: UserInfo)
+
+  /** 请求注册
+   *  
+   *  @param connection The message sender
+   *  @param info 注册时填写的用户信息
+   */
+  def requestRegister(connection: ActorRef, info: UserInfo)
 }

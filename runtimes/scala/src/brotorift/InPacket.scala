@@ -89,4 +89,17 @@ class InPacket(val buffer: ByteString) {
     obj.readFromPacket(this)
     obj
   }
+  
+  def readVector2() = {
+    val x = this.readFloat()
+    val y = this.readFloat()
+    new Vector2(x, y)
+  }
+  
+  def readVector3() = {
+    val x = this.readFloat()
+    val y = this.readFloat()
+    val z = this.readFloat()
+    new Vector3(x, y, z)
+  }
 }
