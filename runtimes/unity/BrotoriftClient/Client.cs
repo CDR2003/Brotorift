@@ -139,7 +139,8 @@ namespace Brotorift
 
 			if( _recvBuffer.Position > 0 )
 			{
-				var newBuffer = new MemoryStream( _recvBuffer.GetBuffer(), (int)_recvBuffer.Position, (int)( _recvBuffer.Length - _recvBuffer.Position ) );
+				var newBuffer = new MemoryStream();
+				newBuffer.Write( _recvBuffer.GetBuffer(), (int)_recvBuffer.Position, (int)( _recvBuffer.Length - _recvBuffer.Position ) );
 				_recvBuffer = newBuffer;
 			}
 		}
