@@ -1,6 +1,6 @@
 <snippet>
-	<content><![CDATA[node ${1:unity} ${2:Client} as ${3:C} namespace ${4:Client}]]></content>
-    <tabTrigger>nodec</tabTrigger>
+	<content><![CDATA[node ${1:scala} ${2:Server} as ${3:S} namespace ${4:server}]]></content>
+    <tabTrigger>nodes</tabTrigger>
     <scope>source.b</scope>
-    <description>node for client</description>
+    <description>node for server</description>
 </snippet>
