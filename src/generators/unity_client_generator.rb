@@ -13,7 +13,7 @@ class BuiltinTypeDef
 			return 'HashSet'
 		when 'Map'
 			return 'Dictionary'
-		when 'Vector2', 'Vector3'
+		when 'Vector2', 'Vector3', 'Color'
 			return @name
 		when 'Matrix4'
 			return 'Matrix4x4'
