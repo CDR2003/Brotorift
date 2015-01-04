@@ -56,6 +56,6 @@ abstract class Connection(remote: ActorRef, address: InetSocketAddress) extends 
     remote ! Write(bsb.result)
   }
   
-  def processMessages: Receive
+  def processMessages(msg: Any): Unit
   def processPacket(packet: InPacket): Unit
 }

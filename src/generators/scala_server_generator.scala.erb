@@ -58,14 +58,16 @@ abstract class <%= n.connection_name %>(remote: ActorRef, address: InetSocketAdd
   
   this.onOpen()
   
-  def processMessages: Receive = {
-    case _: ConnectionClosed =>
-      this.onClose()
-      context.stop(self)<% for m in n.out_direction.messages.values %>
-    case <%= m.name %>(<%= m.members.map { |p| p.name } .join ', ' %>) =>
-      val packet = new OutPacket(OutMessage.<%= m.name %>)<% for p in m.members %>
-      <%= p.scala_write %><% end %>
-      this.sendPacket(packet)<% end %>
+  override def processMessages(msg: Any): Unit = {
+    msg match {
+      case _: ConnectionClosed =>
+        this.onClose()
+        context.stop(self)<% for m in n.out_direction.messages.values %>
+      case <%= m.name %>(<%= m.members.map { |p| p.name } .join ', ' %>) =>
+        val packet = new OutPacket(OutMessage.<%= m.name %>)<% for p in m.members %>
+        <%= p.scala_write %><% end %>
+        this.sendPacket(packet)<% end %>
+    }
   }
   
   def processPacket(packet: InPacket) = {
