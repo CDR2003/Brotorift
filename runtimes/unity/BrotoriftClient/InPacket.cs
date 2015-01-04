@@ -124,5 +124,14 @@ namespace Brotorift
 			var z = this.ReadFloat();
 			return new Vector3( x, y, z );
 		}
+
+		public Color ReadColor()
+		{
+			var r = this.ReadFloat();
+			var g = this.ReadFloat();
+			var b = this.ReadFloat();
+			var a = this.ReadFloat();
+			return new Color( r, g, b, a );
+		}
 	}
 }

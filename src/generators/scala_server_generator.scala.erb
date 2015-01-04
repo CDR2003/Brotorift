@@ -56,11 +56,11 @@ object <%= n.connection_name %> {
 abstract class <%= n.connection_name %>(remote: ActorRef, address: InetSocketAddress) extends Connection(remote, address) {
   import <%= n.connection_name %>._
   
-  this.onOpen(self)
+  this.onOpen()
   
   def processMessages: Receive = {
     case _: ConnectionClosed =>
-      this.onClose(self)
+      this.onClose()
       context.stop(self)<% for m in n.out_direction.messages.values %>
     case <%= m.name %>(<%= m.members.map { |p| p.name } .join ', ' %>) =>
       val packet = new OutPacket(OutMessage.<%= m.name %>)<% for p in m.members %>
@@ -72,27 +72,25 @@ abstract class <%= n.connection_name %>(remote: ActorRef, address: InetSocketAdd
     packet.header match {<% for m in n.in_direction.messages.values %>
       case InMessage.<%= m.name %> =><% for p in m.members %>
         val <%= p.name %> = <%= p.scala_read %><% end %>
-        this.<%= m.scala_method %>(self<% for p in m.members %>, <%= p.name %><% end %>)<% end %>
+        this.<%= m.scala_method %>(<%= m.members.map { |p| p.name } .join ', ' %>)<% end %>
     }
   }
 
   /** Triggers when the connection opened
    * 
-   *  @param connection The incoming connection
    */
-  def onOpen(connection: ActorRef)
+  def onOpen()
   
   /** Triggers when the connection closed
    *  
-   *  @param connection The closed connection
    */
-  def onClose(connection: ActorRef)
+  def onClose()
   <% for m in n.in_direction.messages.values %>
   /** <%= m.doc %>
    *  
    *  @param connection The message sender<% for p in m.members %>
    *  @param <%= p.name %> <%= p.doc %><% end %>
    */
-  def <%= m.scala_method %>(connection: ActorRef<% for p in m.members %>, <%= p.name %>: <%= p.type.scala %><% end %>)
+  def <%= m.scala_method %>(<%= m.members.map { |p| p.name + ': ' + p.type.scala } .join ', ' %>)
 <% end %>}
 <% end %>

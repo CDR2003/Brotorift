@@ -102,4 +102,12 @@ class InPacket(val buffer: ByteString) {
     val z = this.readFloat()
     new Vector3(x, y, z)
   }
+  
+  def readColor() = {
+    val r = this.readFloat()
+    val g = this.readFloat()
+    val b = this.readFloat()
+    val a = this.readFloat()
+    new Color(r, g, b, a)
+  }
 }

@@ -90,4 +90,11 @@ class OutPacket(header: Int) {
     this.writeFloat(value.y)
     this.writeFloat(value.z)
   }
+  
+  def writeColor(value: Color) = {
+    this.writeFloat(value.r)
+    this.writeFloat(value.g)
+    this.writeFloat(value.b)
+    this.writeFloat(value.a)
+  }
 }

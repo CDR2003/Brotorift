@@ -128,5 +128,13 @@ namespace Brotorift
 			this.WriteFloat( value.y );
 			this.WriteFloat( value.z );
 		}
+
+		public void WriteColor( Color value )
+		{
+			this.WriteFloat( value.r );
+			this.WriteFloat( value.g );
+			this.WriteFloat( value.b );
+			this.WriteFloat( value.a );
+		}
 	}
 }

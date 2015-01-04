@@ -18,7 +18,7 @@
 * Map<K, V>: byte(4) + (byte(K) + byte(V)) * len
 * Vector2: byte(Float) * 2
 * Vector3: byte(Float) * 3
-* Matrix4: byte(Float) * 16
+* Color: byte(Float) * 4 // RGBA
 
 ### User defined types
 

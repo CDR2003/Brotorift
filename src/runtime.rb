@@ -219,7 +219,7 @@ class Runtime
 			'Map',
 			'Vector2',
 			'Vector3',
-			'Matrix4',
+			'Color',
 		]
 		type_names.each { |t| @builtins[t] = BuiltinTypeDef.new t }
 	end
