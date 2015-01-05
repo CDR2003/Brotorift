@@ -39,7 +39,7 @@ class ChatClientConnectionImpl(remote: ActorRef, address: InetSocketAddress, use
    * 
    *  @param connection The incoming connection
    */
-  def onOpen(connection: ActorRef) = {
+  def onOpen() = {
     println("Opened")
   }
   
@@ -47,7 +47,7 @@ class ChatClientConnectionImpl(remote: ActorRef, address: InetSocketAddress, use
    *  
    *  @param connection The closed connection
    */
-  def onClose(connection: ActorRef) = {
+  def onClose() = {
     println("Closed")
   }
   
@@ -56,8 +56,8 @@ class ChatClientConnectionImpl(remote: ActorRef, address: InetSocketAddress, use
    *  @param connection The message sender
    *  @param info 登录时填写的用户信息
    */
-  def requestLogin(connection: ActorRef, info: UserInfo) = {
-    userCenter ! Login(connection, info)
+  def requestLogin(info: UserInfo) = {
+    userCenter ! Login(self, info)
   }
   
   /** 请求注册
@@ -65,8 +65,8 @@ class ChatClientConnectionImpl(remote: ActorRef, address: InetSocketAddress, use
    *  @param connection The message sender
    *  @param info 注册时填写的用户信息
    */
-  def requestRegister(connection: ActorRef, info: UserInfo) = {
-    userCenter ! Register(connection, info)
+  def requestRegister(info: UserInfo) = {
+    userCenter ! Register(self, info)
   }
 }
 

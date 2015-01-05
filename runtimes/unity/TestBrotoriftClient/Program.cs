@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace TestBrotoriftClient
 {
-	class Handler : ChatServerConnector.IHandler
+	class ChatServerConnector : ChatServerConnectorBase
 	{
-
 		public void RespondLogin( LoginResult result )
 		{
 			Console.WriteLine( result );
@@ -25,7 +24,7 @@ namespace TestBrotoriftClient
 	{
 		static void Main( string[] args )
 		{
-			var client = new ChatServerConnector( new Handler() );
+			var client = new ChatServerConnector();
 			client.Connect( "localhost", 9000 );
 
 			var info = new UserInfo();

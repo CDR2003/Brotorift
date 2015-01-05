@@ -113,7 +113,7 @@ class NodeDirection
 	end
 
 	def connection_name
-		"#{@remote.name}Connection"
+		"#{@remote.name}ConnectionBase"
 	end
 end
 

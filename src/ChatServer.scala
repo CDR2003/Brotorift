@@ -58,7 +58,7 @@ class UserInfo extends Struct {
 }
 
 
-object ChatClientConnection {
+object ChatClientConnectionBase {
   private object InMessage {
     val RequestLogin = 1001
     val RequestRegister = 1002
@@ -83,12 +83,12 @@ object ChatClientConnection {
 }
 
 
-abstract class ChatClientConnection(remote: ActorRef, address: InetSocketAddress) extends Connection(remote, address) {
-  import ChatClientConnection._
+abstract class ChatClientConnectionBase(remote: ActorRef, address: InetSocketAddress) extends Connection(remote, address) {
+  import ChatClientConnectionBase._
   
   this.onOpen()
   
-  def processMessages(msg: Any): Unit = {
+  override def processMessages(msg: Any): Unit = {
     msg match {
       case _: ConnectionClosed =>
         this.onClose()
@@ -127,12 +127,14 @@ abstract class ChatClientConnection(remote: ActorRef, address: InetSocketAddress
   
   /** 请求登录
    *  
+   *  @param connection The message sender
    *  @param info 登录时填写的用户信息
    */
   def requestLogin(info: UserInfo)
 
   /** 请求注册
    *  
+   *  @param connection The message sender
    *  @param info 注册时填写的用户信息
    */
   def requestRegister(info: UserInfo)
