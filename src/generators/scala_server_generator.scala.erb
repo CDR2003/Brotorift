@@ -56,8 +56,6 @@ object <%= n.connection_name %> {
 abstract class <%= n.connection_name %>(remote: ActorRef, address: InetSocketAddress) extends Connection(remote, address) {
   import <%= n.connection_name %>._
   
-  this.onOpen()
-  
   override def processMessages(msg: Any): Unit = {
     msg match {
       case _: ConnectionClosed =>
@@ -67,6 +65,8 @@ abstract class <%= n.connection_name %>(remote: ActorRef, address: InetSocketAdd
         val packet = new OutPacket(OutMessage.<%= m.name %>)<% for p in m.members %>
         <%= p.scala_write %><% end %>
         this.sendPacket(packet)<% end %>
+      case other =>
+        this.selfReceive(other)
     }
   }
   
@@ -77,11 +77,6 @@ abstract class <%= n.connection_name %>(remote: ActorRef, address: InetSocketAdd
         this.<%= m.scala_method %>(<%= m.members.map { |p| p.name } .join ', ' %>)<% end %>
     }
   }
-
-  /** Triggers when the connection opened
-   * 
-   */
-  def onOpen()
   
   /** Triggers when the connection closed
    *  

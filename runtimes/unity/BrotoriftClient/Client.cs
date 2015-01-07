@@ -33,17 +33,18 @@ namespace Brotorift
 
 		public Client( int segmentSize )
 		{
-			_client = new TcpClient();
-			_recvThread = new Thread( this.ReceiveLoop );
-			_recvBuffer = new MemoryStream();
 			_segmentSize = segmentSize;
-			_packetsToReceive = new Queue<InPacket>();
-			_packetsToSend = new Queue<OutPacket>();
 			_receivePacketsLock = new Mutex();
+			_recvThread = new Thread( this.ReceiveLoop );
 		}
 
 		public void Connect( string hostname, int port )
 		{
+			_client = new TcpClient();
+			_recvBuffer = new MemoryStream();
+			_packetsToReceive = new Queue<InPacket>();
+			_packetsToSend = new Queue<OutPacket>();
+
 			_client.Connect( hostname, port );
 			_stream = _client.GetStream();
 			_recvThread.Start();
@@ -59,6 +60,11 @@ namespace Brotorift
 			_client.EndConnect( asyncResult );
 			_stream = _client.GetStream();
 			_recvThread.Start();
+		}
+
+		public void Close()
+		{
+			_client.Close();
 		}
 
 		public bool Update()
