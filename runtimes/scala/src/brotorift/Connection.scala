@@ -59,5 +59,7 @@ abstract class Connection(remote: ActorRef, address: InetSocketAddress) extends 
   def processMessages(msg: Any): Unit
   def processPacket(packet: InPacket): Unit
 
-  def selfReceive: PartialFunction[Any, Unit]
+  def selfReceive: PartialFunction[Any, Unit] = {
+    case _ =>
+  }
 }
