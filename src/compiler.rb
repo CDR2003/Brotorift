@@ -1,6 +1,6 @@
-require './parser'
-require './compiler_error'
-require './runtime'
+require_relative 'parser'
+require_relative 'compiler_error'
+require_relative 'runtime'
 
 
 class String

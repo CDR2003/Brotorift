@@ -1,5 +1,5 @@
 require 'erb'
-require './case_helper'
+require_relative '../case_helper'
 
 
 class BuiltinTypeDef

@@ -1,6 +1,6 @@
 require 'colorize'
-require './compiler'
-require './sequence_diagram_generator'
+require_relative 'compiler'
+require_relative 'sequence_diagram_generator'
 
 
 if ARGV.length < 1

@@ -1,5 +1,5 @@
 require 'rltk'
-require './ast'
+require_relative 'ast'
 
 
 module RLTK

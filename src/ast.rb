@@ -1,5 +1,5 @@
 require 'rltk/ast'
-require './lexer'
+require_relative 'lexer'
 
 
 module RLTK
