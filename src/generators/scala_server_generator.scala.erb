@@ -84,8 +84,7 @@ abstract class <%= n.connection_name %>(remote: ActorRef, address: InetSocketAdd
   def onClose()
   <% for m in n.in_direction.messages.values %>
   /** <%= m.doc %>
-   *  
-   *  @param connection The message sender<% for p in m.members %>
+   *  <% for p in m.members %>
    *  @param <%= p.name %> <%= p.doc %><% end %>
    */
   def <%= m.scala_method %>(<%= m.members.map { |p| p.name + ': ' + p.type.scala } .join ', ' %>)
