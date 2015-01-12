@@ -93,7 +93,7 @@
 		</dict>
 		<dict>
 			<key>begin</key>
-			<string>\b(enum)\s+([A-Z][A-Za-z0-9_]*)</string>
+			<string>\b(enum)\s+([A-Z_][A-Za-z0-9_]*)</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -135,7 +135,7 @@
 					<key>comment</key>
 					<string>enum element</string>
 					<key>match</key>
-					<string>\b([A-Z][A-Za-z0-9_]*)</string>
+					<string>\b([A-Z_][A-Za-z0-9_]*)</string>
 					<key>name</key>
 					<string>meta.element.brotorift</string>
 				</dict>

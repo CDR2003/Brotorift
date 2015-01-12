@@ -31,7 +31,7 @@ patterns:
   match: \#.*
 - comment: enum
   name: meta.enum.brotorift
-  begin: \b(enum)\s+([A-Z][A-Za-z0-9_]*)
+  begin: \b(enum)\s+([A-Z_][A-Za-z0-9_]*)
   beginCaptures:
     '1': {name: keyword.enum.brotorift}
     '2': {name: entity.name.type.enum.brotorift}
@@ -41,7 +41,7 @@ patterns:
   patterns:
   - comment: enum element
     name: meta.element.brotorift
-    match: \b([A-Z][A-Za-z0-9_]*)
+    match: \b([A-Z_][A-Za-z0-9_]*)
     captures:
       '1': {name: support.constant.element.brotorift}
   - comment: enum value (hexadecimal)
