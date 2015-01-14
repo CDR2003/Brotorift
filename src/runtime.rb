@@ -191,6 +191,7 @@ class Runtime
 	attr_reader :structs
 	attr_reader :directions
 	attr_reader :sequences
+	attr_reader :includes
 
 	def initialize
 		@builtins = {}
@@ -199,6 +200,7 @@ class Runtime
 		@structs = {}
 		@directions = []
 		@sequences = {}
+		@includes = []
 
 		self.init_builtins
 	end
@@ -247,6 +249,10 @@ class Runtime
 
 	def add_sequence sequence_def
 		@sequences[sequence_def.name] = sequence_def
+	end
+
+	def add_include runtime
+		@includes.push runtime
 	end
 
 	def get_node_directions node, side

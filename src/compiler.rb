@@ -24,11 +24,10 @@ class Compiler
 	end
 
 	def compile filename
-		@runtime = Runtime.new
-		self.compile_file runtime, filename
+		@runtime = self.compile_file filename
 	end
 
-	def compile_file runtime, filename
+	def compile_file filename
 		content = File.read filename, encoding: 'utf-8'
 		tokens = Lexer::lex content, filename
 		begin
@@ -37,7 +36,9 @@ class Compiler
 			add_error UnexpectedTokenError.new e.current
 			return
 		end
+		runtime = Runtime.new
 		self.compile_ast runtime, ast
+		runtime
 	end
 
 	def compile_ast runtime, ast
@@ -70,7 +71,8 @@ class Compiler
 			add_error IncludeFileNotFoundError.new filename, include_ast.position
 			return
 		end
-		self.compile_file @runtime, filename
+		include_runtime = self.compile_file filename
+		@runtime.add_include include_runtime
 	end
 
 	def compile_enum enum_ast
