@@ -104,7 +104,7 @@ class Compiler
 		struct_ast.members.each do |member_ast|
 			self.check_case 'struct member', :lower, member_ast
 			self.check_unique 'struct member', struct_def.get_member(member_ast.name), member_ast
-			member_type_def = self.get_member_type member_ast.type
+			member_type_def = self.get_member_type @runtime.nodes.values, member_ast.type
 			member_def = MemberDef.new member_ast, member_type_def
 			struct_def.add_member member_def
 		end
@@ -139,18 +139,20 @@ class Compiler
 		direction_ast.messages.each do |message_ast|
 			self.check_case 'message', :upper, message_ast
 			self.check_unique 'message', direction_def.messages[message_ast.name], message_ast
-			direction_def.add_message self.compile_message message_ast
+			direction_def.add_message self.compile_message direction_def, message_ast
 		end
 		@runtime.add_direction direction_def
 	end
 
-	def compile_message message_ast
+	def compile_message direction_def, message_ast
 		@message_id += 1
 		message_def = MessageDef.new message_ast, @message_base_id + @message_id
 		message_ast.members.each do |member_ast|
 			self.check_case 'message member', :lower, member_ast
 			self.check_unique 'message member', message_def.get_member(member_ast.name), member_ast
-			member_type_def = self.get_member_type member_ast.type
+
+			nodes_to_check = [direction_def.client, direction_def.server]
+			member_type_def = self.get_member_type nodes_to_check, member_ast.type
 			member_def = MemberDef.new member_ast, member_type_def
 			message_def.add_member member_def
 		end
@@ -200,7 +202,7 @@ class Compiler
 		StepDef.new step_ast, direction_def, message_def
 	end
 
-	def get_member_type member_type_ast
+	def get_member_type nodes_to_check, member_type_ast
 		type_def, runtime = self.get_type member_type_ast, true
 		return nil if type_def == nil
 
@@ -208,14 +210,14 @@ class Compiler
 		case type_def.name
 		when 'List'
 			self.check_type_param_count member_type_ast, 1
-			params.push self.get_member_type member_type_ast.params[0]
+			params.push self.get_member_type nodes_to_check, member_type_ast.params[0]
 		when 'Set'
 			self.check_type_param_count member_type_ast, 1
-			params.push self.get_member_type member_type_ast.params[0]
+			params.push self.get_member_type nodes_to_check, member_type_ast.params[0]
 		when 'Map'
 			self.check_type_param_count member_type_ast, 2
-			params.push self.get_member_type member_type_ast.params[0]
-			params.push self.get_member_type member_type_ast.params[1]
+			params.push self.get_member_type nodes_to_check, member_type_ast.params[0]
+			params.push self.get_member_type nodes_to_check, member_type_ast.params[1]
 		else
 			self.check_type_param_count member_type_ast, 0
 		end
