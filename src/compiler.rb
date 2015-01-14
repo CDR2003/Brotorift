@@ -36,7 +36,7 @@ class Compiler
 			add_error UnexpectedTokenError.new e.current
 			return
 		end
-		runtime = Runtime.new
+		runtime = Runtime.new filename
 		self.compile_ast runtime, ast
 		runtime
 	end
@@ -159,7 +159,7 @@ class Compiler
 
 	def compile_sequence sequence_ast
 		self.check_case 'sequence', :upper, sequence_ast
-		self.check_unique 'sequence', @runtime.sequences[sequence_ast.name], sequence_ast
+		self.check_unique 'sequence', @runtime.get_sequence(sequence_ast.name), sequence_ast
 		sequence_def = SequenceDef.new sequence_ast
 		sequence_ast.steps.each do |step_ast|
 			sequence_def.add_step self.compile_step step_ast
@@ -201,7 +201,7 @@ class Compiler
 	end
 
 	def get_member_type member_type_ast
-		type_def = self.get_type member_type_ast, true
+		type_def, runtime = self.get_type member_type_ast, true
 		return nil if type_def == nil
 
 		params = []
@@ -220,23 +220,36 @@ class Compiler
 			self.check_type_param_count member_type_ast, 0
 		end
 
-		TypeInstanceDef.new member_type_ast, type_def, params
+		member_type_def = TypeInstanceDef.new member_type_ast, type_def, params, runtime
+		self.check_type_nodes member_type_ast, member_type_def
+		member_type_def
+	end
+
+	def check_type_nodes member_type_ast, member_type_def
+		return if @runtime == member_type_def.runtime
+
+		@runtime.nodes.each do |n|
+			external_node = member_type_def.runtime.nodes.find { |node| n.name == node.name }
+			if external_node == nil
+				add_error CorrespondingNodeNotFoundError.new member_type_def, n.name
+				return
+			end
+
+			if external_node.language != n.language
+				add_error NodeLanguageMismatchError.new member_type_def, n, external_node
+				return
+			end
+		end
 	end
 
 	def get_type ast, raise_error
 		return nil if ast == nil
 		
-		type_def = @runtime.builtins[ast.name]
-		return type_def if type_def != nil
-
-		type_def = @runtime.enums[ast.name]
-		return type_def if type_def != nil
-
-		type_def = @runtime.structs[ast.name]
-		return type_def if type_def != nil
+		type_def, runtime = @runtime.get_type ast.name
+		return type_def, runtime if type_def != nil
 
 		add_error TypeNotFoundError.new ast, ast.name if raise_error
-		return nil
+		return type_def, runtime
 	end
 
 	def check_case type, initial_case, ast
@@ -248,7 +261,7 @@ class Compiler
 	end
 
 	def check_type_unique ast
-		type_def = self.get_type ast, false
+		type_def, _ = self.get_type ast, false
 		return if type_def == nil
 
 		if type_def.is_a? BuiltinTypeDef

@@ -104,6 +104,37 @@ class NodeNotFoundError < CompilerError
 end
 
 
+class CorrespondingNodeNotFoundError < CompilerError
+	def initialize member_type_def, node_name
+		super member_type_def.ast.position
+		@type = member_type_def.type
+		@node_name = node_name
+	end
+
+	def info
+		"'#{@type.name}' : cannot find corresponding node '#{@node_name}'\n        #{@type.ast.position} : see type definition of '#{@type.name}'"
+	end
+end
+
+
+class NodeLanguageMismatchError < CompilerError
+	def initialize member_type_def, node_def, external_node_def
+		super member_type_def.ast.position
+		@type = member_type_def.type
+		@node_name = node_def.name
+		@node_position = node_def.ast.position
+		@external_node_position = external_node_def.ast.position
+	end
+
+	def info
+		"'#{@type.name}' : node language mismatch\n" +
+		"        #{@node_position} : see node definition of '#{@node_name}'\n" +
+		"        #{@external_node_position} : see external node definition of '#{@node_name}'\n" +
+		"        #{@type.ast.position} : see type definition of '#{@type.name}'\n"
+	end
+end
+
+
 class DirectionNotFoundError < CompilerError
 	def initialize ast, client, direction, server
 		super ast.position

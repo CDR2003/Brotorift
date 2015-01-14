@@ -86,12 +86,13 @@ end
 
 
 class TypeInstanceDef < Def
-	attr_reader :type, :params
+	attr_reader :type, :params, :runtime
 
-	def initialize ast, type, params
+	def initialize ast, type, params, runtime
 		super ast
 		@type = type
 		@params = params
+		@runtime = runtime
 	end
 end
 
@@ -185,6 +186,7 @@ end
 
 
 class Runtime
+	attr_reader :filename
 	attr_reader :builtins
 	attr_reader :nodes
 	attr_reader :enums
@@ -193,7 +195,8 @@ class Runtime
 	attr_reader :sequences
 	attr_reader :includes
 
-	def initialize
+	def initialize filename
+		@filename = filename
 		@builtins = {}
 		@enums = {}
 		@nodes = {}
@@ -239,16 +242,54 @@ class Runtime
 		@structs[struct_def.name] = struct_def
 	end
 
+	def get_type name
+		type_def = @builtins[name]
+		return type_def, self if type_def != nil
+
+		type_def = @enums[name]
+		return type_def, self if type_def != nil
+
+		type_def = @structs[name]
+		return type_def, self if type_def != nil
+
+		@includes.each do |i|
+			type_def = i.get_type name
+			return type_def, i if type_def != nil
+		end
+
+		return nil, self
+	end
+
 	def add_direction direction_def
 		@directions.push direction_def
 	end
 
 	def get_direction client, direction, server
-		@directions.find { |d| d.client == client and d.server == server and d.direction == direction }
+		dir = @directions.find { |d| d.client == client and d.server == server and d.direction == direction }
+		return dir if dir != nil
+
+		@includes.each do |i|
+			dir = i.get_direction client, direction, server
+			return dir if dir != nil
+		end
+
+		return nil
 	end
 
 	def add_sequence sequence_def
 		@sequences[sequence_def.name] = sequence_def
+	end
+
+	def get_sequence name
+		sequence = @sequences[name]
+		return sequence if sequence != nil
+
+		@includes.each do |i|
+			sequence = i.get_sequence name
+			return sequence if sequence != nil
+		end
+
+		return nil
 	end
 
 	def add_include runtime
