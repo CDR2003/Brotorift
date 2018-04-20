@@ -20,9 +20,9 @@ class InitialCaseError < CompilerError
 
 	def info
 		if @type == 'node_nick' then
-			return "'#{@ast.nickname}' : mickname of nodes should be #{@initial_case} case"
+			return "'#{@ast.nickname}' : nickname of nodes should be #{@initial_case} case"
 		else
-			return "'#{@ast.name}' : mame of #{@type}s should be #{@initial_case} case"
+			return "'#{@ast.name}' : name of #{@type}s should be #{@initial_case} case"
 		end
 	end
 end

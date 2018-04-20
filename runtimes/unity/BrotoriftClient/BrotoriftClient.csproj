@@ -38,7 +38,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>D:\DEVELOP\Unity\Editor\Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>D:\DEVELOP\Unity2017.3.1p2\Editor\Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

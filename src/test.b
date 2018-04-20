@@ -53,4 +53,3 @@ sequence Login					# 登录流程
 	C -> S: RequestLogin		# 登录请求
 	C <- S: RespondLogin		# 登录回复
 end
-
