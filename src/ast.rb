@@ -102,7 +102,7 @@ end
 
 class EnumElementDecl < ASTNode
 	value :name, String
-	value :value, Fixnum
+	value :value, Integer
 	value :doc, String
 
 	def to_s
