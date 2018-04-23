@@ -8,6 +8,7 @@ defmodule Brotorift.Supervisor do
   def init(args) do
     children = [
       {Brotorift.Server, args},
+      {Brotorift.ConnectionSupervisor, []}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

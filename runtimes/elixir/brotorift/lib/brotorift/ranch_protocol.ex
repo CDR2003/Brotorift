@@ -3,28 +3,29 @@ defmodule Brotorift.RanchProtocol do
 
   @behaviour :ranch_protocol
 
-  def start_link(ref, socket, transport, _protocolOptions) do
-    pid = :proc_lib.spawn_link(__MODULE__, :init, [{ref, socket, transport}])
+  def start_link(ref, socket, transport, {mod, handler}) do
+    pid = :proc_lib.spawn_link(__MODULE__, :init, [{ref, socket, transport, mod, handler}])
     {:ok, pid}
   end
 
-  def init({ref, socket, transport}) do
+  def init({ref, socket, transport, mod, handler}) do
     IO.puts("Starting protocol")
 
     :ok = :ranch.accept_ack(ref)
     :ok = transport.setopts(socket, [{:active, true}])
-    :gen_server.enter_loop(__MODULE__, [], %{socket: socket, transport: transport})
+    {:ok, connection} = Brotorift.ConnectionSupervisor.start_connection(mod, handler, socket, transport)
+    :gen_server.enter_loop(__MODULE__, [], {socket, transport, mod, connection})
   end
 
-  def handle_info({:tcp, socket, data}, state = %{socket: socket, transport: transport}) do
-    IO.inspect(data)
+  def handle_info({:tcp, socket, data}, {socket, transport, mod, connection}) do
     transport.send(socket, data)
-    {:noreply, state}
+    mod.handle_data(connection, data)
+    {:noreply, {socket, transport, mod, connection}}
   end
 
-  def handle_info({:tcp_closed, socket}, state = %{socket: socket, transport: transport}) do
-    IO.puts("Closing")
+  def handle_info({:tcp_closed, socket}, {socket, transport, mod, connection}) do
+    mod.stop(connection)
     transport.close(socket)
-    {:stop, :normal, state}
+    {:stop, :normal, {socket, transport, mod, connection}}
   end
 end

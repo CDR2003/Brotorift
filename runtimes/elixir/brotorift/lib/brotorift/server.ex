@@ -11,7 +11,9 @@ defmodule Brotorift.Server do
 
   def init(args) do
     port = Keyword.fetch!(args, :port)
-    :ranch.start_listener(__MODULE__, :ranch_tcp, [{:port, port}], Brotorift.RanchProtocol, [])
+    mod = Keyword.fetch!(args, :mod)
+    handler = Keyword.fetch!(args, :handler)
+    :ranch.start_listener(__MODULE__, :ranch_tcp, [{:port, port}], Brotorift.RanchProtocol, {mod, handler})
   end
 
   def terminate(_reason, ranch_server) do
