@@ -5,8 +5,8 @@ defmodule Brotorift.BinaryTest do
 
   defmacro read_write(type, value) do
     quote do
-      data = unquote(:"write_#{type}")(unquote(value), <<>>)
-      assert {unquote(value), _} = unquote(:"read_#{type}")(data)
+      data = unquote(:"write_#{type}")(<<>>, unquote(value))
+      assert {_, unquote(value)} = unquote(:"read_#{type}")(data)
     end
   end
 
@@ -53,5 +53,45 @@ defmodule Brotorift.BinaryTest do
   test "write read string" do
     read_write :string, ""
     read_write :string, "fitbos"
+  end
+
+  test "write read byte buffer" do
+    read_write :byte_buffer, <<>>
+    read_write :byte_buffer, <<1, 2, 3, 255>>
+  end
+
+  test "write read list" do
+    data = write_list(<<>>, [1, 2, 3], &write_int/2)
+    assert {<<>>, [1, 2, 3]} = read_list(data, &read_int/1)
+  end
+
+  test "write read map set" do
+    data = write_set(<<>>, MapSet.new([1, 2, 3]), &write_int/2)
+    {<<>>, set} = read_set(data, &read_int/1)
+    assert MapSet.to_list(set) == [1, 2, 3]
+  end
+
+  test "write read map" do
+    map = %{1 => "A", 2 => "B", 3 => "C"}
+    data = write_map(<<>>, map, &write_int/2, &write_string/2)
+    {<<>>, new_map} = read_map(data, &read_int/1, &read_string/1)
+    assert map == new_map
+  end
+
+  test "write vector2" do
+    read_write :vector2, {0.0, 0.0}
+    read_write :vector2, {-3.0, -4.0}
+    read_write :vector2, {3.0, 4.0}
+  end
+
+  test "write vector3" do
+    read_write :vector3, {0.0, 0.0, 0.0}
+    read_write :vector3, {-3.0, -4.0, -5.0}
+    read_write :vector3, {3.0, 4.0, 5.0}
+  end
+
+  test "write color" do
+    read_write :color, {0.0, 0.0, 0.0, 0.0}
+    read_write :color, {1.0, 1.0, 1.0, 1.0}
   end
 end

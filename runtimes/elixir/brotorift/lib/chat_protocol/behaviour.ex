@@ -3,20 +3,25 @@ defmodule ChatProtocol.UserInfo do
 
   @type t :: %ChatProtocol.UserInfo{username: String.t, password: String.t}
 
-  def read_from_packet(data) do
-    {username, data} = Brotorift.Binary.read_string(data)
-    {password, data} = Brotorift.Binary.read_string(data)
-    {%{username: username, password: password}, data}
+  def read(data) do
+    {data, username} = Brotorift.Binary.read_string(data)
+    {data, password} = Brotorift.Binary.read_string(data)
+    {data, %{username: username, password: password}}
+  end
+
+  def write(data, value) do
+    data = Brotorift.Binary.write_string(data, value.username)
+    data = Brotorift.Binary.write_string(data, value.password)
+    data
   end
 end
 
-
 defmodule ChatProtocol.Enums do
-  def write_login_result(enum, data) do
+  def write_login_result(data, enum) do
     case enum do
-      :succeeded -> {:ok, <<data::binary, 0::32-little>>}
-      :invalid_username -> {:ok, <<data::binary, 1::32-little>>}
-      :invalid_password -> {:ok, <<data::binary, 2::32-little>>}
+      :succeeded -> <<data::binary, 0::32-little>>
+      :invalid_username -> <<data::binary, 1::32-little>>
+      :invalid_password -> <<data::binary, 2::32-little>>
       _ -> :error
     end
   end
@@ -62,7 +67,7 @@ defmodule ChatProtocol.Connection do
 
   def handle_cast({:respond_login, login_result}, {socket, transport, handler, state}) do
     data = <<@header_respond_login::32-little>>
-    {:ok, data} = ChatProtocol.Enums.write_login_result(login_result, data)
+    data = ChatProtocol.Enums.write_login_result(data, login_result)
     data = <<byte_size(data)::32-little, data::binary>>
     transport.send(socket, data)
     {:noreply, {socket, transport, handler, state}}
@@ -77,7 +82,7 @@ defmodule ChatProtocol.Connection do
     <<_size::32-little, header::32-little, packet_data::binary>> = data
     case header do
       @header_request_login ->
-        {info, _data} = ChatProtocol.UserInfo.read_from_packet(packet_data)
+        {_data, info} = ChatProtocol.UserInfo.read(packet_data)
         handler.request_login(self(), state, info)
     end
     {:ok, state}
