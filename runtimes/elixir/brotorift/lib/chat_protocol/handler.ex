@@ -1,17 +1,17 @@
-defmodule ChatProtocol.Handler do
-  @behaviour ChatProtocol.Behaviour
+defmodule TestBrotorift.ChatServerHandler do
+  @behaviour TestBrotorift.ChatServerBehaviour
 
   def open_connection(_connection) do
     {:ok, "fucker"}
   end
 
   def close_connection(_connection, _state) do
-
+    :ok
   end
 
   def request_login(connection, state, info) do
     IO.puts "Login: " <> info.username <> ", " <> info.password
-    ChatProtocol.Connection.respond_login(connection, :succeeded)
+    :ok = TestBrotorift.ChatServerConnection.respond_login(connection, :succeeded)
     {:ok, state}
   end
 

@@ -1,5 +1,5 @@
 node unity ChatClient as C namespace TestBrotoriftClient	# 客户端
-node scala ChatServer as S namespace testBrotorift
+node elixir ChatServer as S namespace TestBrotorift
 
 
 enum LoginResult				# 登录结果

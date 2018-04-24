@@ -1,0 +1,156 @@
+defmodule <%= node.namespace %>.Enums do<% for e in runtime.enums.values %>
+  def <%= e.elixir_read_name %>(data) do
+    <<value::32-little, data::binary>> = data
+    case value do<% for v in e.elements.values %>
+      <%= v.value %> -> {data, <%= v.elixir_name %>}<% end %>
+      _ -> :error
+    end
+  end
+
+  def <%= e.elixir_write_name %>(data, value) do
+    case value do<% for v in e.elements.values %>
+      <%= v.elixir_name %> -> <<data::binary, <%= v.value %>::32-little>><% end %>
+      _ -> :error
+    end
+  end
+<% end %>end
+
+<% for s in runtime.structs.values %>
+defmodule <%= node.namespace %>.<%= s.name %> do
+  defstruct [<%= s.elixir_members %>]
+
+  @typedoc """
+  <%= s.doc %><% for m in s.members %>
+  `:<%= m.elixir_name %>`: <%= m.doc %><% end %>
+  """
+  @type t :: %<%= node.namespace %>.<%= s.name %>{<%= s.elixir_members_with_types node %>}
+
+  def read(data) do<% for m in s.members %>
+    {data, <%= m.elixir_name %>} = <%= m.type.elixir_read node %><% end %>
+    {data, %{<%= s.elixir_members_with_values %>}}
+  end
+
+  def write(data, value) do<% for m in s.members %>
+    data = <%= m.type.elixir_write node, 'value.' + m.elixir_name %><% end %>
+    data
+  end
+end
+<% end %>
+<% for n in runtime.get_node_directions node, :server %>
+defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
+  use GenServer, restart: :temporary
+
+  import <%= node.namespace %>.Enums
+
+  @behaviour Brotorift.ConnectionBehaviour
+  <% for m in n.in_direction.messages.values %>
+  <%= m.elixir_header_name %> <%= m.id %><% end %>
+  <% for m in n.out_direction.messages.values %>
+  <%= m.elixir_header_name %> <%= m.id %><% end %>
+  <% for m in n.out_direction.messages.values %>
+  @doc """
+  <%= m.doc %>
+
+  ## Parameters
+
+    - `connection`: <%= node.elixir_connection %> Pid<% for p in m.members %>
+    - `<%= p.elixir_name %>`: <%= p.doc %>
+    <% end %>
+  """
+  @spec <%= m.elixir_name %>(connection :: pid(), <%= m.elixir_params_with_types node %>) :: :ok
+  def <%= m.elixir_name %>(connection, <%= m.elixir_params %>) do
+    GenServer.cast(connection, {:<%= m.elixir_name %>, <%= m.elixir_params %>})
+  end
+  <% end %>
+  def start_link(args) do
+    GenServer.start_link(__MODULE__, args)
+  end
+
+  def handle_data(pid, data) do
+    GenServer.cast(pid, {:handle_data, data})
+  end
+
+  def stop(pid) do
+    GenServer.stop(pid)
+  end
+
+  def init({socket, transport, handler}) do
+    {:ok, state} = handler.open_connection(self())
+    {:ok, {socket, transport, handler, state}}
+  end
+
+  def handle_cast({:handle_data, data}, {socket, transport, handler, state}) do
+    {:ok, new_state} = process_packet(data, handler, state)
+    {:noreply, {socket, transport, handler, new_state}}
+  end
+  <% for m in n.out_direction.messages.values %>
+  def handle_cast({:<%= m.elixir_name %>, <%= m.elixir_params %>}, {socket, transport, handler, state}) do
+    data = <<<%= m.elixir_header_name %>::32-little>><% for p in m.members %>
+    data = <%= p.type.elixir_write node, p.elixir_name %><% end %>
+    data = <<byte_size(data)::32-little, data::binary>>
+    transport.send(socket, data)
+    {:noreply, {socket, transport, handler, state}}
+  end
+  <% end %>
+  def terminate(_reason, {_socket, _transport, handler, state}) do
+    handler.close_connection(self(), state)
+  end
+
+  defp process_packet(<<>>, _handler, state) do
+    {:ok, state}
+  end
+  defp process_packet(data, handler, state) do
+    <<_size::32-little, header::32-little, data::binary>> = data
+    case header do<% for m in n.in_direction.messages.values %>
+      <%= m.elixir_header_name %> -><% for p in m.members %>
+        {data, <%= p.elixir_name %>} = <%= p.type.elixir_read node %><% end %>
+        handler.<%= m.elixir_name %>(self(), state, <%= m.elixir_params %>)
+        process_packet(data, handler, state)<% end %>
+    end
+  end
+end
+
+
+defmodule <%= node.namespace %>.<%= node.elixir_behaviour %> do
+
+  @doc """
+  Calls when a new client connects
+
+  ## Parameters
+
+    - `connection`: The <%= node.elixir_connection %> Pid for the client
+
+  ## Returns
+
+    {:ok, state}
+
+  """
+  @callback open_connection(connection :: pid()) :: {:ok, any()}
+
+  @doc """
+  Calls when a client disconnects
+
+  ## Parameters
+
+    - `connection`: The <%= node.elixir_connection %> Pid for the client
+    - `state`: The state for the connection
+
+  """
+  @callback close_connection(connection :: pid(), state :: any()) :: :ok
+
+  <% for m in n.in_direction.messages.values %>
+  @doc """
+  <%= m.doc %>
+
+  ## Parameters
+
+    - `connection`: The <%= node.elixir_connection %> Pid for the client
+    - `state`: The state for the connection<% for p in m.members %>
+    - `<%= p.elixir_name %>`: <%= p.doc %>
+    <% end %>
+  """
+  @callback <%= m.elixir_name %>(connection :: pid(), state :: any(), <%= m.elixir_params_with_types node %>) :: {:ok, any()}
+  <% end %>
+end
+
+<% end %>
