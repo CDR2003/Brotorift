@@ -34,8 +34,8 @@ namespace TestBrotoriftClient
 
 			for( ; ; )
 			{
-				var result = client.Update();
-				if( result == false )
+				client.Update();
+				if( client.CurrentState == ClientState.Disconnected )
 				{
 					break;
 				}

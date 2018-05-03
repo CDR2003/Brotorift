@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
+    <Compile Include="ClientState.cs" />
     <Compile Include="IStruct.cs" />
     <Compile Include="InPacket.cs" />
     <Compile Include="OutPacket.cs" />

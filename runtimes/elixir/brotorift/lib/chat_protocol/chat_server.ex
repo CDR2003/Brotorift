@@ -165,6 +165,8 @@ end
 
 defmodule TestBrotorift.ChatServerBehaviour do
 
+  @callback start() :: :ok
+
   @doc """
   Calls when a new client connects
 

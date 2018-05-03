@@ -9,7 +9,7 @@ defmodule Brotorift.RanchProtocol do
   end
 
   def init({ref, socket, transport, mod, handler}) do
-    IO.puts("Starting protocol")
+    #IO.puts("Starting protocol")
 
     :ok = :ranch.accept_ack(ref)
     :ok = transport.setopts(socket, [{:active, true}])

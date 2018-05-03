@@ -15,7 +15,7 @@ defmodule Brotorift.MixProject do
   def application do
     [
       extra_applications: [:logger, :ranch],
-      mod: {Brotorift, []},
+      mod: {Brotorift, [port: 9000, mod: TestBrotorift.ChatServerConnection, handler: TestBrotorift.ChatServerHandler]},
     ]
   end
 

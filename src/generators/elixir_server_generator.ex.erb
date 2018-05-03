@@ -75,7 +75,7 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
   end
 
   def init({socket, transport, handler}) do
-    {:ok, state} = handler.open_connection(self())
+    {:ok, state} = handler.open_connection(self(), socket)
     {:ok, {socket, transport, handler, state}}
   end
 
@@ -104,7 +104,7 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
     case header do<% for m in n.in_direction.messages.values %>
       <%= m.elixir_header_name %> -><% for p in m.members %>
         {data, <%= p.elixir_name %>} = <%= p.type.elixir_read node %><% end %>
-        handler.<%= m.elixir_name %>(self(), state, <%= m.elixir_params %>)
+        {:ok, state} = handler.<%= m.elixir_name %>(self(), state, <%= m.elixir_params %>)
         process_packet(data, handler, state)<% end %>
     end
   end
@@ -114,18 +114,24 @@ end
 defmodule <%= node.namespace %>.<%= node.elixir_behaviour %> do
 
   @doc """
+  Calls when the server started
+  """
+  @callback start() :: :ok
+
+  @doc """
   Calls when a new client connects
 
   ## Parameters
 
     - `connection`: The <%= node.elixir_connection %> Pid for the client
+    - `socket`: The socket for the client
 
   ## Returns
 
     {:ok, state}
 
   """
-  @callback open_connection(connection :: pid()) :: {:ok, any()}
+  @callback open_connection(connection :: pid(), socket :: :gen_tcp.socket()) :: {:ok, any()}
 
   @doc """
   Calls when a client disconnects

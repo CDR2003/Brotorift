@@ -1,6 +1,10 @@
 defmodule TestBrotorift.ChatServerHandler do
   @behaviour TestBrotorift.ChatServerBehaviour
 
+  def start() do
+    :ok
+  end
+
   def open_connection(_connection) do
     {:ok, "fucker"}
   end

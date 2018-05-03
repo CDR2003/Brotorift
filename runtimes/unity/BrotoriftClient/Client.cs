@@ -10,6 +10,10 @@ namespace Brotorift
 {
 	public abstract class Client
 	{
+		public ClientState CurrentState { get; private set; }
+
+		public event Action connect;
+
 		private TcpClient _client;
 
 		private Thread _recvThread;
@@ -26,6 +30,8 @@ namespace Brotorift
 
 		private Mutex _receivePacketsLock;
 
+		private bool _justConnected;
+
 		public Client()
 			: this( 1024 )
 		{
@@ -35,47 +41,81 @@ namespace Brotorift
 		{
 			_segmentSize = segmentSize;
 			_receivePacketsLock = new Mutex();
-			_recvThread = new Thread( this.ReceiveLoop );
+			_packetsToReceive = new Queue<InPacket>();
+			_packetsToSend = new Queue<OutPacket>();
+
+			this.CurrentState = ClientState.Disconnected;
 		}
 
 		public void Connect( string hostname, int port )
 		{
+			if( this.CurrentState == ClientState.Connecting || this.CurrentState == ClientState.Connected )
+			{
+				return;
+			}
+
 			_client = new TcpClient();
 			_recvBuffer = new MemoryStream();
-			_packetsToReceive = new Queue<InPacket>();
-			_packetsToSend = new Queue<OutPacket>();
+			_packetsToReceive.Clear();
+			_packetsToSend.Clear();
 
 			_client.Connect( hostname, port );
+			_justConnected = true;
+			this.CurrentState = ClientState.Connected;
+
 			_stream = _client.GetStream();
+			_recvThread = new Thread( this.ReceiveLoop );
 			_recvThread.Start();
 		}
 
-		public IAsyncResult BeginConnect( string hostname, int port, AsyncCallback callback, object state )
+		public void BeginConnect( string hostname, int port )
 		{
-			return _client.BeginConnect( hostname, port, callback, state );
-		}
+			if( this.CurrentState == ClientState.Connected )
+			{
+				return;
+			}
 
-		public void EndConnect( IAsyncResult asyncResult )
-		{
-			_client.EndConnect( asyncResult );
-			_stream = _client.GetStream();
-			_recvThread.Start();
+			_client = new TcpClient();
+			_recvBuffer = new MemoryStream();
+			_packetsToReceive.Clear();
+			_packetsToSend.Clear();
+
+			this.CurrentState = ClientState.Connecting;
+			_client.BeginConnect( hostname, port, this.OnConnected, null );
 		}
 
 		public void Close()
 		{
+			if( this.CurrentState == ClientState.Disconnected )
+			{
+				return;
+			}
+
+			this.CurrentState = ClientState.Disconnected;
 			_client.Close();
+			_recvThread.Join();
 		}
 
-		public bool Update()
+		public void Update()
 		{
+			if( _justConnected )
+			{
+				_justConnected = false;
+				if( this.connect != null )
+				{
+					this.connect();
+				}
+			}
+
 			_receivePacketsLock.WaitOne();
 			while( _packetsToReceive.Count > 0 )
 			{
 				var packet = _packetsToReceive.Dequeue();
 				if( packet == null )
 				{
-					return false;
+					_receivePacketsLock.ReleaseMutex();
+					this.Close();
+					return;
 				}
 				this.ProcessPacket( packet );
 			}
@@ -87,11 +127,29 @@ namespace Brotorift
 				var result = this.DoSendPacket( packet );
 				if( result == false )
 				{
-					return false;
+					this.Close();
+					return;
 				}
 			}
 
-			return true;
+			return;
+		}
+
+		private void OnConnected( IAsyncResult result )
+		{
+			if( _client.Connected == false )
+			{
+				this.CurrentState = ClientState.Disconnected;
+				return;
+			}
+
+			this.CurrentState = ClientState.Connected;
+			_client.EndConnect( result );
+			_stream = _client.GetStream();
+			_recvThread = new Thread( this.ReceiveLoop );
+			_recvThread.Start();
+
+			_justConnected = true;
 		}
 
 		private void ReceiveLoop()
@@ -113,10 +171,17 @@ namespace Brotorift
 							currentPosition += bytesRead;
 						}
 					}
+					else
+					{
+						_receivePacketsLock.WaitOne();
+						_packetsToReceive.Enqueue( null );
+						_receivePacketsLock.ReleaseMutex();
+						break;
+					}
 					this.PushPackets();
 				}
 			}
-			catch( IOException )
+			catch( Exception )
 			{
 				_receivePacketsLock.WaitOne();
 				_packetsToReceive.Enqueue( null );
@@ -167,7 +232,7 @@ namespace Brotorift
 			{
 				_stream.Write( stream.GetBuffer(), 0, (int)stream.Length );
 			}
-			catch( IOException )
+			catch( Exception )
 			{
 				return false;
 			}
