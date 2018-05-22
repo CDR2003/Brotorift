@@ -9,9 +9,13 @@
 * Short: byte(2)
 * Int: byte(4)
 * Long: byte(8)
+* UShort: byte(2)
+* UInt: byte(4)
+* ULong: byte(8)
 * Float: byte(4)
 * Double: byte(8)
 * String: byte(1) + byte(len)
+* DateTime: byte(4) // UTC
 * ByteBuffer: byte(1) + byte(len)
 * List<T>: byte(4) + byte(T) * len
 * Set<T>: byte(4) + byte(T) * len
