@@ -5,6 +5,12 @@ require_relative '../case_helper'
 class BuiltinTypeDef
 	def unity
 		case @name
+		when 'UShort'
+			return 'ushort'
+		when 'UInt'
+			return 'uint'
+		when 'ULong'
+			return 'ulong'
 		when 'DateTime'
 			return 'DateTime'
 		when 'ByteBuffer'
