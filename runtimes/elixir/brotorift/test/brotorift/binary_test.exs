@@ -37,6 +37,21 @@ defmodule Brotorift.BinaryTest do
     read_write :long, -123456789
     read_write :long, 123456789
   end
+  
+  test "write read ushort" do
+    read_write :ushort, 0
+    read_write :ushort, 1234
+  end
+
+  test "write read uint" do
+    read_write :uint, 0
+    read_write :uint, 123123
+  end
+
+  test "write read ulong" do
+    read_write :ulong, 0
+    read_write :ulong, 123456789
+  end
 
   test "write read float" do
     read_write :float, 0.0
@@ -53,6 +68,11 @@ defmodule Brotorift.BinaryTest do
   test "write read string" do
     read_write :string, ""
     read_write :string, "fitbos"
+  end
+  
+  test "write read datetime" do
+    datetime = DateTime.utc_now()
+    read_write :datetime, datetime
   end
 
   test "write read byte buffer" do

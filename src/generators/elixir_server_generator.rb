@@ -56,12 +56,20 @@ class BuiltinTypeDef
             return 'integer()'
         when 'Long'
             return 'integer()'
+        when 'UShort'
+            return 'non_neg_integer()'
+        when 'UInt'
+            return 'non_neg_integer()'
+        when 'ULong'
+            return 'non_neg_integer()'
         when 'Float'
             return 'float()'
         when 'Double'
             return 'float()'
         when 'String'
             return 'String.t()'
+        when 'DateTime'
+            return 'DateTime.t()'
         when 'ByteBuffer'
             return 'binary()'
         when 'Vector2'
@@ -87,6 +95,12 @@ class BuiltinTypeDef
             return "Brotorift.Binary.read_int(data)"
         when 'Long'
             return "Brotorift.Binary.read_long(data)"
+        when 'UShort'
+            return "Brotorift.Binary.read_ushort(data)"
+        when 'UInt'
+            return "Brotorift.Binary.read_uint(data)"
+        when 'ULong'
+            return "Brotorift.Binary.read_ulong(data)"
         when 'Float'
             return "Brotorift.Binary.read_float(data)"
         when 'Double'
@@ -118,6 +132,12 @@ class BuiltinTypeDef
             return "Brotorift.Binary.write_int(data, #{member_name})"
         when 'Long'
             return "Brotorift.Binary.write_long(data, #{member_name})"
+        when 'UShort'
+            return "Brotorift.Binary.write_ushort(data, #{member_name})"
+        when 'UInt'
+            return "Brotorift.Binary.write_uint(data, #{member_name})"
+        when 'ULong'
+            return "Brotorift.Binary.write_ulong(data, #{member_name})"
         when 'Float'
             return "Brotorift.Binary.write_float(data, #{member_name})"
         when 'Double'
@@ -149,6 +169,12 @@ class BuiltinTypeDef
             return "&Brotorift.Binary.read_int/1"
         when 'Long'
             return "&Brotorift.Binary.read_long/1"
+        when 'UShort'
+            return "&Brotorift.Binary.read_ushort/1"
+        when 'UInt'
+            return "&Brotorift.Binary.read_uint/1"
+        when 'ULong'
+            return "&Brotorift.Binary.read_ulong/1"
         when 'Float'
             return "&Brotorift.Binary.read_float/1"
         when 'Double'
@@ -180,6 +206,12 @@ class BuiltinTypeDef
             return "&Brotorift.Binary.write_int/2"
         when 'Long'
             return "&Brotorift.Binary.write_long/2"
+        when 'UShort'
+            return "&Brotorift.Binary.write_ushort/2"
+        when 'UInt'
+            return "&Brotorift.Binary.write_uint/2"
+        when 'ULong'
+            return "&Brotorift.Binary.write_ulong/2"
         when 'Float'
             return "&Brotorift.Binary.write_float/2"
         when 'Double'

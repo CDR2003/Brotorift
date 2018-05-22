@@ -5,6 +5,8 @@ require_relative '../case_helper'
 class BuiltinTypeDef
 	def unity
 		case @name
+		when 'DateTime'
+			return 'DateTime'
 		when 'ByteBuffer'
 			return 'byte[]'
 		when 'List'

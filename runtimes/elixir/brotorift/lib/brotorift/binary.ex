@@ -27,6 +27,21 @@ defmodule Brotorift.Binary do
     {data, value}
   end
 
+  def read_ushort(data) do
+    <<value::16-little-unsigned, data::binary>> = data
+    {data, value}
+  end
+
+  def read_uint(data) do
+    <<value::32-little-unsigned, data::binary>> = data
+    {data, value}
+  end
+
+  def read_ulong(data) do
+    <<value::64-little-unsigned, data::binary>> = data
+    {data, value}
+  end
+
   def read_float(data) do
     <<value::32-little-float, data::binary>> = data
     {data, value}
@@ -41,6 +56,12 @@ defmodule Brotorift.Binary do
     <<len::32-little, data::binary>> = data
     <<value::binary-size(len), data::binary>> = data
     {data, value}
+  end
+  
+  def read_datetime(data) do
+    {data, timestamp} = read_int(data)
+    {:ok, datetime} = DateTime.from_unix(timestamp)
+    {data, datetime}
   end
 
   def read_byte_buffer(data) do
@@ -127,6 +148,18 @@ defmodule Brotorift.Binary do
     <<data::binary, value::64-little-signed>>
   end
 
+  def write_ushort(data, value) do
+    <<data::binary, value::16-little-unsigned>>
+  end
+
+  def write_uint(data, value) do
+    <<data::binary, value::32-little-unsigned>>
+  end
+
+  def write_ulong(data, value) do
+    <<data::binary, value::64-little-unsigned>>
+  end
+
   def write_float(data, value) do
     <<data::binary, value::32-little-float>>
   end
@@ -137,6 +170,11 @@ defmodule Brotorift.Binary do
 
   def write_string(data, value) do
     <<data::binary, String.length(value)::32-little, value::binary>>
+  end
+  
+  def write_datetime(data, value) do
+    timestamp = DateTime.to_unix(value)
+    write_int(data, timestamp)
   end
 
   def write_byte_buffer(data, value) do

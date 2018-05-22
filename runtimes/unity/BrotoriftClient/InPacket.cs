@@ -47,6 +47,21 @@ namespace Brotorift
 			return _reader.ReadInt64();
 		}
 
+		public ushort ReadUShort()
+		{
+			return _reader.ReadUInt16();
+		}
+
+		public uint ReadUInt()
+		{
+			return _reader.ReadUInt32();
+		}
+
+		public ulong ReadULong()
+		{
+			return _reader.ReadUInt64();
+		}
+
 		public float ReadFloat()
 		{
 			return _reader.ReadSingle();
@@ -61,6 +76,12 @@ namespace Brotorift
 		{
 			var buffer = this.ReadByteBuffer();
 			return Encoding.UTF8.GetString( buffer );
+		}
+
+		public DateTime ReadDateTime()
+		{
+			var timestamp = this.ReadInt();
+			return timestamp.ToDateTime();
 		}
 
 		public byte[] ReadByteBuffer()

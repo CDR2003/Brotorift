@@ -61,6 +61,21 @@ namespace Brotorift
 			_writer.Write( value );
 		}
 
+		public void WriteUShort( ushort value )
+		{
+			_writer.Write( value );
+		}
+
+		public void WriteUInt( uint value )
+		{
+			_writer.Write( value );
+		}
+
+		public void WriteULong( ulong value )
+		{
+			_writer.Write( value );
+		}
+
 		public void WriteFloat( float value )
 		{
 			_writer.Write( value );
@@ -75,6 +90,11 @@ namespace Brotorift
 		{
 			var buffer = Encoding.UTF8.GetBytes( value );
 			this.WriteByteBuffer( buffer );
+		}
+
+		public void WriteDateTime( DateTime dateTime )
+		{
+			_writer.Write( dateTime.ToUnixTime() );
 		}
 
 		public void WriteByteBuffer( byte[] value )
