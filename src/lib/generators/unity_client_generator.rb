@@ -163,8 +163,12 @@ end
 
 
 class NodeDirection
-	def class_name
-		"#{@remote.name}ConnectorBase"
+	def connector_name
+		"#{@remote.name}Connector"
+	end
+
+	def handler_name
+		"I#{@remote.name}Handler"
 	end
 end
 

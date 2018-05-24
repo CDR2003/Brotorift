@@ -51,16 +51,22 @@ namespace <%= node.namespace %>
 	<% end %>
 	#endregion
 	<% for node_direction in runtime.get_node_directions node, :client %>
-	public abstract class <%= node_direction.class_name %> : Client
+	public interface <%= node_direction.handler_name %>
 	{<% for m in node_direction.in_direction.messages.values %>
 		/// <summary>
 		/// <%= m.doc %>
 		/// </summary><% for p in m.members %>
 		/// <param name="<%= p.name %>"><%= p.doc %></param><% end %>
-		protected abstract <%= m.unity %>;<% end %>
+		<%= m.unity %>;
+	<% end %>}
 
-		public <%= node_direction.class_name %>()
+	public class <%= node_direction.connector_name %> : Client
+	{
+		public <%= node_direction.handler_name %> handler { get; private set; }
+
+		public <%= node_direction.connector_name %>( <%= node_direction.handler_name %> handler )
 		{
+			this.handler = handler;
 		}
 
 		private enum InMessage
@@ -91,7 +97,7 @@ namespace <%= node.namespace %>
 				case InMessage.<%= m.name %>:
 					{<% for p in m.members %>
 						var <%= p.unity_read %><% end %>
-						this.<%= m.name %>( <%= m.unity_param %> );
+						this.handler.<%= m.name %>( <%= m.unity_param %> );
 					}
 					break;<% end %>
 				default:
