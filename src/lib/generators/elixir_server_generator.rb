@@ -259,11 +259,11 @@ class StructTypeDef
     end
 
     def elixir_reader node
-        "#{node.namespace}.#{@name}.read/1"
+        "&#{node.namespace}.#{@name}.read/1"
     end
 
     def elixir_writer node
-        "#{node.namespace}.#{@name}.write/2"
+        "&#{node.namespace}.#{@name}.write/2"
     end
 end
 
@@ -314,11 +314,11 @@ class TypeInstanceDef
     end
 
     def elixir_list_read node
-        'read_list(data, ' + @params[0].elixir_reader(node) + ')'
+        'Brotorift.Binary.read_list(data, ' + @params[0].elixir_reader(node) + ')'
     end
     
     def elixir_list_write node, member_name
-        'write_list(data, ' + member_name + ', ' + @params[0].elixir_writer(node) + ')'
+        'Brotorift.Binary.write_list(data, ' + member_name + ', ' + @params[0].elixir_writer(node) + ')'
     end
 
     def elixir_list_reader node
@@ -334,11 +334,11 @@ class TypeInstanceDef
     end
 
     def elixir_set_read node
-        'read_set(data, ' + @params[0].elixir_reader(node) + ')'
+        'Brotorift.Binary.read_set(data, ' + @params[0].elixir_reader(node) + ')'
     end
     
     def elixir_set_write node, member_name
-        'write_set(data, ' + member_name + ', ' + @params[0].elixir_writer(node) + ')'
+        'Brotorift.Binary.write_set(data, ' + member_name + ', ' + @params[0].elixir_writer(node) + ')'
     end
 
     def elixir_set_reader node
@@ -354,11 +354,11 @@ class TypeInstanceDef
     end
 
     def elixir_map_read node
-        'read_map(data, ' + @params[0].elixir_reader(node) + ', ' + @params[1].elixir_reader(node) + ')'
+        'Brotorift.Binary.read_map(data, ' + @params[0].elixir_reader(node) + ', ' + @params[1].elixir_reader(node) + ')'
     end
     
     def elixir_map_write node, member_name
-        'write_map(data, ' + member_name + ', ' + @params[0].elixir_writer(node) + ', ' + @params[1].elixir_writer(node) + ')'
+        'Brotorift.Binary.write_map(data, ' + member_name + ', ' + @params[0].elixir_writer(node) + ', ' + @params[1].elixir_writer(node) + ')'
     end
 
     def elixir_map_reader node
