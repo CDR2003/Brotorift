@@ -57,9 +57,9 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
     - `<%= p.elixir_name %>`: <%= p.doc %>
     <% end %>
   """
-  @spec <%= m.elixir_name %>(connection :: pid(), <%= m.elixir_params_with_types node %>) :: :ok
-  def <%= m.elixir_name %>(connection, <%= m.elixir_params %>) do
-    GenServer.cast(connection, {:<%= m.elixir_name %>, <%= m.elixir_params %>})
+  @spec <%= m.elixir_name %>(connection :: pid()<%= m.elixir_params_with_types node %>) :: :ok
+  def <%= m.elixir_name %>(connection<%= m.elixir_params %>) do
+    GenServer.cast(connection, {:<%= m.elixir_name %><%= m.elixir_params %>})
   end
   <% end %>
   def start_link(args) do
@@ -84,7 +84,7 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
     {:noreply, {socket, transport, handler, new_state}}
   end
   <% for m in n.out_direction.messages.values %>
-  def handle_cast({:<%= m.elixir_name %>, <%= m.elixir_params %>}, {socket, transport, handler, state}) do
+  def handle_cast({:<%= m.elixir_name %><%= m.elixir_params %>}, {socket, transport, handler, state}) do
     data = <<<%= m.elixir_header_name %>::32-little>><% for p in m.members %>
     data = <%= p.type.elixir_write node, p.elixir_name %><% end %>
     data = <<byte_size(data)::32-little, data::binary>>
@@ -104,7 +104,7 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
     case header do<% for m in n.in_direction.messages.values %>
       <%= m.elixir_header_name %> -><% for p in m.members %>
         {data, <%= p.elixir_name %>} = <%= p.type.elixir_read node %><% end %>
-        {:ok, state} = handler.<%= m.elixir_name %>(self(), state, <%= m.elixir_params %>)
+        {:ok, state} = handler.<%= m.elixir_name %>(self(), state<%= m.elixir_params %>)
         process_packet(data, handler, state)<% end %>
     end
   end
@@ -155,7 +155,7 @@ defmodule <%= node.namespace %>.<%= node.elixir_behaviour %> do
     - `<%= p.elixir_name %>`: <%= p.doc %>
     <% end %>
   """
-  @callback <%= m.elixir_name %>(connection :: pid(), state :: any(), <%= m.elixir_params_with_types node %>) :: {:ok, any()}
+  @callback <%= m.elixir_name %>(connection :: pid(), state :: any()<%= m.elixir_params_with_types node %>) :: {:ok, any()}
   <% end %>
 end
 

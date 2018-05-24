@@ -255,7 +255,7 @@ class StructTypeDef
     end
 
     def elixir_write node, member_name
-        "#{node.namespace}.#{@name}.write(data, #{member_name}"
+        "#{node.namespace}.#{@name}.write(data, #{member_name})"
     end
 
     def elixir_reader node
@@ -388,11 +388,15 @@ class MessageDef
     end
 
     def elixir_params
-        members.map { |m| m.elixir_name } .join ', '
+        return '' if members.empty?
+        params = members.map { |m| m.elixir_name } .join ', '
+        ', ' + params
     end
 
     def elixir_params_with_types node
-        members.map { |m| m.elixir_name + ' :: ' + m.type.elixir_type(node) } .join ', '
+        return '' if members.empty?
+        params = members.map { |m| m.elixir_name + ' :: ' + m.type.elixir_type(node) } .join ', '
+        ', ' + params
     end
 end
 
