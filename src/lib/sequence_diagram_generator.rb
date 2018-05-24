@@ -40,7 +40,8 @@ class SequenceDiagramGenerator
 			when :right
 				head = direction.client.name + ' -> ' + direction.server.name
 			end
-			str += head + ': ' + step.message.name + ' ' + step.doc + "\n"
+			strParams = step.message.members.map { |m| m.name } .join ', '
+			str += head + ': ' + step.message.name + '(' + strParams + ') ' + step.doc + "\n"
 		end
 		str
 	end
