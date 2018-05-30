@@ -19,6 +19,8 @@ defmodule <%= node.namespace %>.Enums do<% for e in runtime.enums.values %>
 defmodule <%= node.namespace %>.<%= s.name %> do
   defstruct [<%= s.elixir_members %>]
 
+  import <%= node.namespace %>.Enums
+
   @typedoc """
   <%= s.doc %><% for m in s.members %>
   `:<%= m.elixir_name %>`: <%= m.doc %><% end %>
