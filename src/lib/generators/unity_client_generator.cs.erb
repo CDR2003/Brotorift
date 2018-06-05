@@ -62,7 +62,7 @@ namespace <%= node.namespace %>
 
 	public class <%= node_direction.connector_name %> : Client
 	{
-		public <%= node_direction.handler_name %> handler { get; private set; }
+		public <%= node_direction.handler_name %> handler { get; set; }
 
 		public <%= node_direction.connector_name %>( <%= node_direction.handler_name %> handler )
 		{
@@ -92,6 +92,11 @@ namespace <%= node.namespace %>
 
 		protected override void ProcessPacket( InPacket packet )
 		{
+			if( this.handler == null )
+			{
+				return;
+			}
+
 			switch( (InMessage)packet.Header )
 			{<% for m in node_direction.in_direction.messages.values %>
 				case InMessage.<%= m.name %>:
