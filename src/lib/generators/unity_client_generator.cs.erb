@@ -64,9 +64,12 @@ namespace <%= node.namespace %>
 	{
 		public <%= node_direction.handler_name %> handler { get; set; }
 
+		public PacketProcessPolicy policy { get; set; }
+
 		public <%= node_direction.connector_name %>( <%= node_direction.handler_name %> handler )
 		{
 			this.handler = handler;
+			this.policy = PacketProcesPolicy.Discard;
 		}
 
 		private enum InMessage
@@ -90,11 +93,11 @@ namespace <%= node.namespace %>
 			<% end %>this.SendPacket( packet );
 		}<% end %>
 
-		protected override void ProcessPacket( InPacket packet )
+		protected override bool ProcessPacket( InPacket packet )
 		{
 			if( this.handler == null )
 			{
-				return;
+				return this.policy == PacketProcessPolicy.Discard;
 			}
 
 			switch( (InMessage)packet.Header )
@@ -108,6 +111,7 @@ namespace <%= node.namespace %>
 				default:
 					break;
 			}
+			return true;
 		}
 	}
 	<% end %>
