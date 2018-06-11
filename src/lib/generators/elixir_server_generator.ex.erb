@@ -102,7 +102,7 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
     {:ok, state}
   end
   defp process_packet(data, handler, state) do
-    <<_size::32-little, header::32-little, data::binary>> = data
+    <<header::32-little, data::binary>> = data
     case header do<% for m in n.in_direction.messages.values %>
       <%= m.elixir_header_name %> -><% for p in m.members %>
         {data, <%= p.elixir_name %>} = <%= p.type.elixir_read node %><% end %>
