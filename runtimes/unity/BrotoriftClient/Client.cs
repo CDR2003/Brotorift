@@ -12,6 +12,8 @@ namespace Brotorift
 	{
 		public ClientState CurrentState { get; private set; }
 
+		public string dataHead = "cs_dh";
+
 		public event Action connect;
 
 		private TcpClient _client;
