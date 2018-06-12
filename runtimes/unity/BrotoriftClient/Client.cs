@@ -12,6 +12,8 @@ namespace Brotorift
 	{
 		public ClientState CurrentState { get; private set; }
 
+		public long dataHead = 153687;
+
 		public event Action connect;
 
 		private TcpClient _client;
@@ -110,14 +112,19 @@ namespace Brotorift
 			_receivePacketsLock.WaitOne();
 			while( _packetsToReceive.Count > 0 )
 			{
-				var packet = _packetsToReceive.Dequeue();
+				var packet = _packetsToReceive.Peek();
 				if( packet == null )
 				{
+					_packetsToReceive.Dequeue();
 					_receivePacketsLock.ReleaseMutex();
 					this.Close();
 					return;
 				}
-				this.ProcessPacket( packet );
+				var shouldDiscard = this.ProcessPacket( packet );
+				if( shouldDiscard )
+				{
+					_packetsToReceive.Dequeue();
+				}
 			}
 			_receivePacketsLock.ReleaseMutex();
 
@@ -156,7 +163,7 @@ namespace Brotorift
 		{
 			try
 			{
-				for( ; ; )
+				for(; ; )
 				{
 					var segment = new byte[_segmentSize];
 					var bytesRead = _stream.Read( segment, 0, _segmentSize );
@@ -225,6 +232,7 @@ namespace Brotorift
 		{
 			var stream = new MemoryStream();
 			var writer = new BinaryWriter( stream );
+			writer.Write( this.dataHead );
 			writer.Write( packet.Length );
 			writer.Write( packet.Buffer, 0, packet.Length );
 
@@ -240,6 +248,6 @@ namespace Brotorift
 			return true;
 		}
 
-		protected abstract void ProcessPacket( InPacket packet );
+		protected abstract bool ProcessPacket( InPacket packet );
 	}
 }
