@@ -66,9 +66,10 @@ namespace <%= node.namespace %>
 
 		public PacketProcessPolicy policy { get; set; }
 
-		public <%= node_direction.connector_name %>( <%= node_direction.handler_name %> handler )
+		public <%= node_direction.connector_name %>( <%= node_direction.handler_name %> handler, string dataHead )
 		{
 			this.handler = handler;
+			this.dataHead = dataHead;
 			this.policy = PacketProcessPolicy.Discard;
 		}
 
