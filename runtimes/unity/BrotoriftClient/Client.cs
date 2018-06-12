@@ -12,7 +12,7 @@ namespace Brotorift
 	{
 		public ClientState CurrentState { get; private set; }
 
-		public string dataHead = "cs_dh";
+		public long dataHead = 153687;
 
 		public event Action connect;
 
@@ -232,7 +232,7 @@ namespace Brotorift
 		{
 			var stream = new MemoryStream();
 			var writer = new BinaryWriter( stream );
-			writer.Write( dataHead );
+			writer.Write( this.dataHead );
 			writer.Write( packet.Length );
 			writer.Write( packet.Buffer, 0, packet.Length );
 
