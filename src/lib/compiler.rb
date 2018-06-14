@@ -66,7 +66,7 @@ class Compiler
 	end
 
 	def compile_include include_ast
-		filename = include_ast.filename + '.b'
+		filename = include_ast.filename + '.brotorift'
 		if not File.exists? filename
 			add_error IncludeFileNotFoundError.new filename, include_ast.position
 			return
