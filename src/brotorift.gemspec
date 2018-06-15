@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
     s.name = 'brotorift'
-    s.version = '0.4.3'
+    s.version = '0.4.4'
     s.date = '2018-05-23'
     s.summary = 'Brotorift'
     s.description = 'Brotorift generator'
@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
 
     s.add_runtime_dependency 'colorize', '~> 0.7'
     s.add_runtime_dependency 'rltk', '~> 3.0'
+    s.add_runtime_dependency 'filigree', '= 0.2.0'
 
     s.files = [
         'lib/ast.rb',

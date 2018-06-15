@@ -193,7 +193,6 @@ class Runtime
 	attr_reader :structs
 	attr_reader :directions
 	attr_reader :sequences
-	attr_reader :includes
 
 	def initialize filename
 		@filename = filename
@@ -203,7 +202,6 @@ class Runtime
 		@structs = {}
 		@directions = []
 		@sequences = {}
-		@includes = []
 
 		self.init_builtins
 	end
@@ -256,11 +254,6 @@ class Runtime
 		type_def = @structs[name]
 		return type_def, self if type_def != nil
 
-		@includes.each do |i|
-			type_def = i.get_type name
-			return type_def, i if type_def != nil
-		end
-
 		return nil, self
 	end
 
@@ -271,11 +264,6 @@ class Runtime
 	def get_direction client, direction, server
 		dir = @directions.find { |d| d.client == client and d.server == server and d.direction == direction }
 		return dir if dir != nil
-
-		@includes.each do |i|
-			dir = i.get_direction client, direction, server
-			return dir if dir != nil
-		end
 
 		return nil
 	end
@@ -288,16 +276,7 @@ class Runtime
 		sequence = @sequences[name]
 		return sequence if sequence != nil
 
-		@includes.each do |i|
-			sequence = i.get_sequence name
-			return sequence if sequence != nil
-		end
-
 		return nil
-	end
-
-	def add_include runtime
-		@includes.push runtime
 	end
 
 	def get_node_directions node, side
