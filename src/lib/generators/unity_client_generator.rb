@@ -184,7 +184,10 @@ class UnityClientGenerator < Generator
 		template = File.read erb_file
 		erb = ERB.new template
 		content = erb.result binding
-		File.write "#{node.name}.cs", content
+
+		output_dir = File.dirname runtime.filename
+		output_path = File.join output_dir, "#{node.name}.cs"
+		File.write output_path, content
 	end
 end
 

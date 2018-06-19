@@ -427,7 +427,10 @@ class ElixirServerGenerator < Generator
         template = File.read erb_file
         erb = ERB.new template
         content = erb.result binding
-        File.write "#{node.elixir_name}.ex", content
+
+        output_dir = File.dirname runtime.filename
+        output_path = File.join output_dir, "#{node.elixir_name}.ex"
+        File.write output_path, content
     end
 end
 

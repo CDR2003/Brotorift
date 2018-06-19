@@ -61,12 +61,14 @@ class Compiler
 	end
 
 	def compile_include include_ast
+		dir = File.dirname @runtime.filename
 		filename = include_ast.filename + '.brotorift'
-		if not File.exists? filename
+		full_path = File.join dir, filename
+		if not File.exists? full_path
 			add_error IncludeFileNotFoundError.new filename, include_ast.position
 			return
 		end
-		self.compile filename
+		self.compile full_path
 	end
 
 	def compile_enum enum_ast
@@ -126,10 +128,11 @@ class Compiler
 		@message_base_id += 1000
 		@message_id = 0
 
-		old_direction = @runtime.get_direction client, direction_ast.direction, server
-		self.check_unique 'direction', old_direction, direction_ast
+		direction_def = @runtime.get_direction client, direction_ast.direction, server
+		if direction_def == nil
+			direction_def = DirectionDef.new direction_ast, client, server
+		end
 
-		direction_def = DirectionDef.new direction_ast, client, server
 		direction_ast.messages.each do |message_ast|
 			self.check_case 'message', :upper, message_ast
 			self.check_unique 'message', direction_def.messages[message_ast.name], message_ast
