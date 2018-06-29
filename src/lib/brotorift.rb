@@ -91,7 +91,7 @@ class Brotorift
 	def run file_name
 		load_generators
 		compiler = Compiler.new
-		compiler.compile file_name
+		compiler.compile file_name, true
 		if compiler.errors.length > 0
 			print_compile_errors compiler.errors
 			exit 1

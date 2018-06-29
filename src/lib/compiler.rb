@@ -23,7 +23,7 @@ class Compiler
 		@message_id = 0
 	end
 
-	def compile filename
+	def compile filename, read_version
 		content = File.read filename, encoding: 'utf-8'
 		tokens = Lexer::lex content, filename
 		begin
@@ -33,12 +33,12 @@ class Compiler
 			return
 		end
 		@runtime = Runtime.new filename if @runtime == nil
-		self.compile_ast @runtime, ast
+		self.compile_ast @runtime, ast, read_version
 	end
 
-	def compile_ast runtime, ast
+	def compile_ast runtime, ast, read_version
 		@runtime = runtime
-		@runtime.version = ast.version
+		@runtime.version = ast.version if read_version
 		ast.decls.each do |decl|
 			begin
 				case decl
@@ -69,7 +69,7 @@ class Compiler
 			add_error IncludeFileNotFoundError.new filename, include_ast.position
 			return
 		end
-		self.compile full_path
+		self.compile full_path, false
 	end
 
 	def compile_enum enum_ast
