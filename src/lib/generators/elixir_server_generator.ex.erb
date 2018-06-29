@@ -42,6 +42,10 @@ end
 defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
   use GenServer, restart: :temporary
 
+  @version <%= runtime.version %>
+
+  @sc_packet_data 128
+
   import <%= node.namespace %>.Enums
 
   @behaviour Brotorift.ConnectionBehaviour
@@ -64,6 +68,10 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
     GenServer.cast(connection, {:<%= m.elixir_name %><%= m.elixir_params %>})
   end
   <% end %>
+  def version() do
+    @version
+  end
+
   def start_link(args) do
     GenServer.start_link(__MODULE__, args)
   end
@@ -89,7 +97,7 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
   def handle_cast({:<%= m.elixir_name %><%= m.elixir_params %>}, {socket, transport, handler, state}) do
     data = <<<%= m.elixir_header_name %>::32-little>><% for p in m.members %>
     data = <%= p.type.elixir_write node, p.elixir_name %><% end %>
-    data = <<byte_size(data)::32-little, data::binary>>
+    data = <<@sc_packet_data::8, byte_size(data)::32-little, data::binary>>
     transport.send(socket, data)
     {:noreply, {socket, transport, handler, state}}
   end

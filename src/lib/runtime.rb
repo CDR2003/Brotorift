@@ -188,6 +188,7 @@ end
 class Runtime
 	attr_reader :filename
 	attr_reader :builtins
+	attr_accessor :version
 	attr_reader :nodes
 	attr_reader :enums
 	attr_reader :structs
@@ -197,6 +198,7 @@ class Runtime
 	def initialize filename
 		@filename = filename
 		@builtins = {}
+		@version = 1
 		@enums = {}
 		@nodes = {}
 		@structs = {}

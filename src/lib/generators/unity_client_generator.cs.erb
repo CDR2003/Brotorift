@@ -62,12 +62,15 @@ namespace <%= node.namespace %>
 
 	public class <%= node_direction.connector_name %> : Client
 	{
+		public const int ClientVersion = <%= runtime.version %>;
+
 		public <%= node_direction.handler_name %> handler { get; set; }
 
 		public PacketProcessPolicy policy { get; set; }
 
 		public <%= node_direction.connector_name %>( <%= node_direction.handler_name %> handler, long dataHead )
 		{
+			this.Version = ClientVersion;
 			this.handler = handler;
 			this.dataHead = dataHead;
 			this.policy = PacketProcessPolicy.Discard;

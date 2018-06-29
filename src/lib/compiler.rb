@@ -38,7 +38,8 @@ class Compiler
 
 	def compile_ast runtime, ast
 		@runtime = runtime
-		ast.each do |decl|
+		@runtime.version = ast.version
+		ast.decls.each do |decl|
 			begin
 				case decl
 				when IncludeDecl

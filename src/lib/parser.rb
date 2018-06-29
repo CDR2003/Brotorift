@@ -16,6 +16,15 @@ end
 class Parser < RLTK::Parser
 	@@enum_value = 0
 
+	production(:file) do
+		clause('version_decl decl_list')							{ |version_number, decls| FileDecl.new self.position, version_number, decls }
+		clause('decl_list')											{ |decls| FileDecl.new self.position, 1, decls }
+	end
+
+	production(:version_decl) do
+		clause('VERSION NUMBER')									{ |_, version_number| version_number }
+	end
+
 	list(:decl_list, :decl)
 
 	production(:decl) do

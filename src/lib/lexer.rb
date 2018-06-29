@@ -6,6 +6,7 @@ class Lexer < RLTK::Lexer
 	rule(/\s/)
 
 	# Keyword
+	rule(/version/)					{ :VERSION }
 	rule(/namespace/)				{ :NAMESPACE }
 	rule(/include/)					{ :INCLUDE }
 	rule(/node/)					{ :NODE }

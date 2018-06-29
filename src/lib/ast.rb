@@ -41,6 +41,16 @@ end
 class TopDecl < ASTNode
 end
 
+class FileDecl < ASTNode
+	value :version, Integer
+	value :decls, [TopDecl]
+
+	def to_s
+		decls_str = decls.join "\n"
+		"version #{version}\n\n#{decls_str}"
+	end
+end
+
 class IncludeDecl < TopDecl
 	value :filename, String
 
