@@ -29,7 +29,7 @@ defmodule <%= node.namespace %>.<%= s.name %> do
 
   def read(data) do<% for m in s.members %>
     {data, <%= m.elixir_name %>} = <%= m.type.elixir_read node %><% end %>
-    {data, %{<%= s.elixir_members_with_values %>}}
+    {data, %<%= node.namespace %>.<%= s.name %>{<%= s.elixir_members_with_values %>}}
   end
 
   def write(data, value) do<% for m in s.members %>

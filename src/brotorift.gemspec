@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
     s.name = 'brotorift'
-    s.version = '0.5.2'
+    s.version = '0.5.3'
     s.date = '2018-05-23'
     s.summary = 'Brotorift'
     s.description = 'Brotorift generator'
