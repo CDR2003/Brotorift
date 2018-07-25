@@ -6,15 +6,28 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
+// Remove Later
+using UnityEngine;
+
 namespace Brotorift
 {
 	public abstract class Client
 	{
 		public ClientState CurrentState { get; private set; }
 
+		public int Version { get; protected set; }
+
 		public long dataHead = 153687;
 
+		public float heartbeatSendRate = 5.0f;
+
+		public float heartbeatReceiveTimeout = 20.0f;
+
 		public event Action connect;
+
+		public event Action<WrongVersionInfo> versionMismatch;
+
+		public event Action timeout;
 
 		private TcpClient _client;
 
@@ -33,6 +46,16 @@ namespace Brotorift
 		private Mutex _receivePacketsLock;
 
 		private bool _justConnected;
+
+		private WrongVersionInfo _wrongVersionInfo;
+
+		private bool _heartbeatStarted = false;
+
+		private float _hbSendTimer = 0.0f;
+
+		private float _hbReceiveTimer = 0.0f;
+
+		private bool _lastHeartbeatReceived = false;
 
 		public Client()
 			: this( 1024 )
@@ -60,6 +83,7 @@ namespace Brotorift
 			_recvBuffer = new MemoryStream();
 			_packetsToReceive.Clear();
 			_packetsToSend.Clear();
+			_wrongVersionInfo = null;
 
 			_client.Connect( hostname, port );
 			_justConnected = true;
@@ -81,6 +105,7 @@ namespace Brotorift
 			_recvBuffer = new MemoryStream();
 			_packetsToReceive.Clear();
 			_packetsToSend.Clear();
+			_wrongVersionInfo = null;
 
 			this.CurrentState = ClientState.Connecting;
 			_client.BeginConnect( hostname, port, this.OnConnected, null );
@@ -98,7 +123,7 @@ namespace Brotorift
 			_recvThread.Join();
 		}
 
-		public void Update()
+		public void Update( float deltaTime )
 		{
 			if( _justConnected )
 			{
@@ -106,6 +131,50 @@ namespace Brotorift
 				if( this.connect != null )
 				{
 					this.connect();
+				}
+
+				_heartbeatStarted = true;
+				this.SendHeartbeat();
+			}
+
+			if( _heartbeatStarted )
+			{
+				_hbReceiveTimer += deltaTime;
+				if( _hbReceiveTimer >= this.heartbeatReceiveTimeout )
+				{
+					_hbReceiveTimer = 0.0f;
+					if( this.timeout != null )
+					{
+						this.timeout();
+					}
+
+					_heartbeatStarted = false;
+				}
+
+				_hbSendTimer += deltaTime;
+				if( _hbSendTimer >= this.heartbeatSendRate )
+				{
+					_hbSendTimer = 0.0f;
+					if( _lastHeartbeatReceived )
+					{
+						_hbReceiveTimer = 0.0f;
+						_lastHeartbeatReceived = false;
+					}
+					this.SendHeartbeat();
+				}
+			}
+
+			if( _wrongVersionInfo != null )
+			{
+				lock( _wrongVersionInfo )
+				{
+					if( this.versionMismatch != null )
+					{
+						this.versionMismatch( _wrongVersionInfo );
+						_wrongVersionInfo = null;
+						this.Close();
+						return;
+					}
 				}
 			}
 
@@ -120,6 +189,7 @@ namespace Brotorift
 					this.Close();
 					return;
 				}
+				
 				var shouldDiscard = this.ProcessPacket( packet );
 				if( shouldDiscard )
 				{
@@ -163,6 +233,13 @@ namespace Brotorift
 		{
 			try
 			{
+				// Check version first
+				var succeeded = this.SendVersionCheck();
+				if( succeeded == false )
+				{
+					return;
+				}
+
 				for(; ; )
 				{
 					var segment = new byte[_segmentSize];
@@ -196,23 +273,80 @@ namespace Brotorift
 			}
 		}
 
+		private bool SendVersionCheck()
+		{
+			var stream = new MemoryStream();
+			var writer = new BinaryWriter( stream );
+			writer.Write( this.dataHead );
+			writer.Write( PacketType.CsPacketClientVersion );
+			writer.Write( this.Version );
+
+			try
+			{
+				_stream.Write( stream.GetBuffer(), 0, (int)stream.Length );
+			}
+			catch( Exception )
+			{
+				this.Close();
+				return false;
+			}
+			return true;
+		}
+
+		private bool SendHeartbeat()
+		{
+			var stream = new MemoryStream();
+			var writer = new BinaryWriter( stream );
+			writer.Write( this.dataHead );
+			writer.Write( PacketType.CsHeartbeat );
+
+			try
+			{
+				_stream.Write( stream.GetBuffer(), 0, (int)stream.Length );
+			}
+			catch( Exception )
+			{
+				this.Close();
+				return false;
+			}
+			return true;
+		}
+
 		private void PushPackets()
 		{
 			_recvBuffer.Position = 0;
-			while( _recvBuffer.Length - _recvBuffer.Position > sizeof( int ) )
+			while( _recvBuffer.Length - _recvBuffer.Position > 0 )
 			{
 				var reader = new BinaryReader( _recvBuffer );
-				var packetSize = reader.ReadInt32();
-				if( _recvBuffer.Length - _recvBuffer.Position < packetSize )
+				var packetType = reader.ReadByte();
+				if( packetType == PacketType.ScPacketWrongVersion )
 				{
-					_recvBuffer.Position -= sizeof( int );
-					break;
+					var clientVersion = reader.ReadInt32();
+					var serverVersion = reader.ReadInt32();
+					lock( _wrongVersionInfo )
+					{
+						_wrongVersionInfo = new WrongVersionInfo( clientVersion, serverVersion );
+					}
 				}
+				else if( packetType == PacketType.ScHeartbeat )
+				{
+					_lastHeartbeatReceived = true;
+					_hbReceiveTimer = 0.0f;
+				}
+				else if( packetType == PacketType.ScPacketData )
+				{
+					var packetSize = reader.ReadInt32();
+					if( _recvBuffer.Length - _recvBuffer.Position < packetSize )
+					{
+						_recvBuffer.Position -= sizeof( int );
+						break;
+					}
 
-				var content = reader.ReadBytes( packetSize );
-				_receivePacketsLock.WaitOne();
-				_packetsToReceive.Enqueue( new InPacket( new MemoryStream( content ) ) );
-				_receivePacketsLock.ReleaseMutex();
+					var content = reader.ReadBytes( packetSize );
+					_receivePacketsLock.WaitOne();
+					_packetsToReceive.Enqueue( new InPacket( new MemoryStream( content ) ) );
+					_receivePacketsLock.ReleaseMutex();
+				}
 			}
 
 			if( _recvBuffer.Position > 0 )
@@ -233,6 +367,7 @@ namespace Brotorift
 			var stream = new MemoryStream();
 			var writer = new BinaryWriter( stream );
 			writer.Write( this.dataHead );
+			writer.Write( PacketType.CsPacketData );
 			writer.Write( packet.Length );
 			writer.Write( packet.Buffer, 0, packet.Length );
 
