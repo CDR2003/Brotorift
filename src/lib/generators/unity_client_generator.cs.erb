@@ -68,6 +68,8 @@ namespace <%= node.namespace %>
 
 		public PacketProcessPolicy policy { get; set; }
 
+		public event Action<OutMessage> sendMessage;
+
 		public event Action<InMessage> beforeReceiveMessage;
 
 		public event Action<InMessage> afterReceiveMessage;
@@ -99,8 +101,13 @@ namespace <%= node.namespace %>
 			var packet = new OutPacket( (int)OutMessage.<%= m.name %> );
 			<% for p in m.members %><%= p.unity_write %>
 			<% end %>this.SendPacket( packet );
-		}<% end %>
 
+			if( this.sendMessage != null )
+			{
+				this.sendMessage( OutMessage.<%= m.name %> );
+			}
+		}
+		<% end %>
 		protected override bool ProcessPacket( InPacket packet )
 		{
 			if( this.handler == null )
