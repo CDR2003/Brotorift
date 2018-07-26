@@ -68,7 +68,11 @@ namespace <%= node.namespace %>
 
 		public PacketProcessPolicy policy { get; set; }
 
-		public <%= node_direction.connector_name %>( <%= node_direction.handler_name %> handler, long dataHead )
+		public event Action<InMessage> beforeReceiveMessage;
+
+		public event Action<InMessage> afterReceiveMessage;
+
+		public <%= node_direction.connector_name %>( <%= node_direction.handler_name %> handler, int dataHead )
 		{
 			this.Version = ClientVersion;
 			this.handler = handler;
@@ -76,12 +80,12 @@ namespace <%= node.namespace %>
 			this.policy = PacketProcessPolicy.Discard;
 		}
 
-		private enum InMessage
+		public enum InMessage
 		{<% for m in node_direction.in_direction.messages.values %>
 			<%= m.name %> = <%= m.id %>,<% end %>
 		}
 
-		private enum OutMessage
+		public enum OutMessage
 		{<% for m in node_direction.out_direction.messages.values %>
 			<%= m.name %> = <%= m.id %>,<% end %>
 		}
@@ -104,6 +108,11 @@ namespace <%= node.namespace %>
 				return this.policy == PacketProcessPolicy.Discard;
 			}
 
+			if( this.beforeReceiveMessage != null )
+			{
+				this.beforeReceiveMessage( (InMessage)packet.Header );
+			}
+
 			switch( (InMessage)packet.Header )
 			{<% for m in node_direction.in_direction.messages.values %>
 				case InMessage.<%= m.name %>:
@@ -115,6 +124,12 @@ namespace <%= node.namespace %>
 				default:
 					break;
 			}
+
+			if( this.afterReceiveMessage != null )
+			{
+				this.afterReceiveMessage( (InMessage)packet.Header );
+			}
+
 			return true;
 		}
 	}
