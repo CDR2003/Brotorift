@@ -90,8 +90,13 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
   end
 
   def handle_cast({:handle_data, data}, {socket, transport, handler, state}) do
-    {:ok, new_state} = process_packet(data, handler, state)
-    {:noreply, {socket, transport, handler, new_state}}
+    result = process_packet(data, handler, state)
+    case result do
+      {:ok, new_state} ->
+        {:noreply, {socket, transport, handler, new_state}}
+      {:stop, reason, new_state} ->
+        {:stop, reason, new_state}
+    end
   end
   <% for m in n.out_direction.messages.values %>
   def handle_cast({:<%= m.elixir_name %><%= m.elixir_params %>}, {socket, transport, handler, state}) do
@@ -117,8 +122,13 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
         if byte_size(data) != 0 do
           stop(self())
         else
-          {:ok, state} = handler.<%= m.elixir_name %>(self(), state<%= m.elixir_params %>)
-          process_packet(data, handler, state)
+          result = handler.<%= m.elixir_name %>(self(), state<%= m.elixir_params %>)
+          case result do
+            {:ok, state} ->
+              process_packet(data, handler, state)
+            {:stop, reason, new_state} ->
+              {:stop, reason, new_state}
+          end
         end<% end %>
     end
   end
