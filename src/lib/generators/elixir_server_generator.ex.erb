@@ -73,7 +73,7 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
   end
 
   def start_link(args) do
-    GenServer.start_link(__MODULE__, args)
+    :gen_server.start_link({:local, :gate}, __MODULE__, args)
   end
 
   def handle_data(pid, data) do
@@ -95,7 +95,7 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
       {:ok, new_state} ->
         {:noreply, {socket, transport, handler, new_state}}
       {:stop, reason, new_state} ->
-        {:stop, reason, new_state}
+        {:stop, reason, {socket, transport, handler, new_state}}
     end
   end
   <% for m in n.out_direction.messages.values %>
