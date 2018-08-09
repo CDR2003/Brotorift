@@ -73,7 +73,7 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
   end
 
   def start_link(args) do
-    :gen_server.start_link({:local, :gate}, __MODULE__, args)
+    :gen_server.start_link({:local, :<%= node.elixir_connection %>.downcase}, __MODULE__, args)
   end
 
   def handle_data(pid, data) do
