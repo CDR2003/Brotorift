@@ -107,8 +107,9 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
     {:noreply, {socket, transport, handler, state}}
   end
   <% end %>
-  def terminate(_reason, {_socket, _transport, handler, state}) do
+  def terminate(_reason, {socket, transport, handler, state}) do
     handler.close_connection(self(), state)
+    transport.close(socket)
   end
 
   defp process_packet(<<>>, _handler, state) do
