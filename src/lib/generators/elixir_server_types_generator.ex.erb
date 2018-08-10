@@ -1,0 +1,40 @@
+defmodule <%= node.namespace %>.Enums do<% for e in runtime.enums.values %>
+  def <%= e.elixir_read_name %>(data) do
+    <<value::32-little, data::binary>> = data
+    case value do<% for v in e.elements.values %>
+      <%= v.value %> -> {data, <%= v.elixir_name %>}<% end %>
+      _ -> :error
+    end
+  end
+
+  def <%= e.elixir_write_name %>(data, value) do
+    case value do<% for v in e.elements.values %>
+      <%= v.elixir_name %> -> <<data::binary, <%= v.value %>::32-little>><% end %>
+      _ -> :error
+    end
+  end
+<% end %>end
+
+<% for s in runtime.structs.values %>
+defmodule <%= node.namespace %>.<%= s.name %> do
+  defstruct [<%= s.elixir_members %>]
+
+  import <%= node.namespace %>.Enums
+
+  @typedoc """
+  <%= s.doc %><% for m in s.members %>
+  `:<%= m.elixir_name %>`: <%= m.doc %><% end %>
+  """
+  @type t :: %<%= node.namespace %>.<%= s.name %>{<%= s.elixir_members_with_types node %>}
+
+  def read(data) do<% for m in s.members %>
+    {data, <%= m.elixir_name %>} = <%= m.type.elixir_read node %><% end %>
+    {data, %<%= node.namespace %>.<%= s.name %>{<%= s.elixir_members_with_values %>}}
+  end
+
+  def write(data, value) do<% for m in s.members %>
+    data = <%= m.type.elixir_write node, 'value.' + m.elixir_name %><% end %>
+    data
+  end
+end
+<% end %>

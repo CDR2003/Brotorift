@@ -422,14 +422,19 @@ class ElixirServerGenerator < Generator
     end
 
     def generate node, runtime
+        self.generate_file node, runtime, 'elixir_server_types_generator', "#{node.elixir_name}_types"
+        self.generate_file node, runtime, 'elixir_server_generator', node.elixir_name
+    end
+
+    def generate_file node, runtime, template_file, generated_file
         folder = File.expand_path File.dirname __FILE__
-        erb_file = folder + '/elixir_server_generator.ex.erb'
+        erb_file = folder + "/#{template_file}.ex.erb"
         template = File.read erb_file
         erb = ERB.new template
         content = erb.result binding
 
         output_dir = File.dirname runtime.filename
-        output_path = File.join output_dir, "#{node.elixir_name}.ex"
+        output_path = File.join output_dir, "#{generated_file}.ex"
         File.write output_path, content
     end
 end
