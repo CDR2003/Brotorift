@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
     s.name = 'brotorift'
-    s.version = '0.7.0'
+    s.version = '0.7.1'
     s.date = '2018-05-23'
     s.summary = 'Brotorift'
     s.description = 'Brotorift generator'
@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
         'lib/runtime.rb',
         'lib/sequence_diagram_generator.rb',
         'lib/generators/elixir_server_generator.ex.erb',
+        'lib/generators/elixir_server_types_generator.ex.erb',
         'lib/generators/elixir_server_generator.rb',
         'lib/generators/scala_server_generator.scala.erb',
         'lib/generators/scala_server_generator.rb',
