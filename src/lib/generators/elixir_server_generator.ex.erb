@@ -41,12 +41,16 @@ defmodule <%= node.namespace %>.<%= node.elixir_connection %> do
   end
 
   def stop(pid) do
-    GenServer.stop(pid)
+    GenServer.cast(pid, :stop)
   end
 
   def init({socket, transport, handler}) do
     {:ok, state} = handler.open_connection(self(), socket)
     {:ok, {socket, transport, handler, state}}
+  end
+
+  def handle_cast(:stop, state) do
+    {:stop, :normal, state}
   end
 
   def handle_cast({:handle_data, data}, {socket, transport, handler, state}) do
