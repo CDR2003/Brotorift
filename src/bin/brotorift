@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+if ARGV.length < 1
+    puts 'Usage: brotorift [-g] [file_to_compile.brotorift]'
+    puts '    -g: Generate sequence diagram'
+    puts '    Please provide the brotorift file.'
+    puts
+    exit 1
+end
+
+require 'brotorift'
+
+brotorift = Brotorift.new
+if ARGV.length == 1
+    brotorift.run ARGV[0], false
+else
+    generate_sequence_diagrams = ARGV[0] == '-g'
+    brotorift.run ARGV[1], generate_sequence_diagrams
+end

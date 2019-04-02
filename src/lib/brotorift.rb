@@ -45,13 +45,13 @@ class Brotorift
 	end
 	
 	
-	def generate_all_code runtime
+	def generate_all_code runtime, generate_diagram
 		runtime.directions.each do |direction|
 			generate_code runtime, direction.client, :client
 			generate_code runtime, direction.server, :server
 		end
 	
-		generate_sequence_diagrams runtime
+		generate_sequence_diagrams runtime if generate_diagram
 	end
 	
 	
@@ -88,7 +88,7 @@ class Brotorift
 		Generator.generators.find { |g| g.language == language and g.side == side }
 	end
 	
-	def run file_name
+	def run file_name, generate_diagram
 		load_generators
 		compiler = Compiler.new
 		compiler.compile file_name, true
@@ -96,7 +96,7 @@ class Brotorift
 			print_compile_errors compiler.errors
 			exit 1
 		else
-			generate_all_code compiler.runtime
+			generate_all_code compiler.runtime, generate_diagram
 		end
 	end
 end
