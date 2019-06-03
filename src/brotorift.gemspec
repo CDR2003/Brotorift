@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
     s.name = 'brotorift'
-    s.version = '0.8.0'
+    s.version = '0.9.0'
     s.date = '2018-05-23'
     s.summary = 'Brotorift'
     s.description = 'Brotorift generator'
@@ -32,5 +32,8 @@ Gem::Specification.new do |s|
         'lib/generators/scala_server_generator.rb',
         'lib/generators/unity_client_generator.cs.erb',
         'lib/generators/unity_client_generator.rb',
+        'lib/generators/bot_generator.ex.erb',
+        'lib/generators/bot_generator.rb',
+        'lib/generators/bot_types_generator.ex.erb'
     ]
 end

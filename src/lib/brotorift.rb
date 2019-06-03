@@ -49,6 +49,7 @@ class Brotorift
 		runtime.directions.each do |direction|
 			generate_code runtime, direction.client, :client
 			generate_code runtime, direction.server, :server
+			generate_bot_code runtime, direction.client
 		end
 	
 		generate_sequence_diagrams runtime if generate_diagram
@@ -82,6 +83,17 @@ class Brotorift
 		else
 			@generated_nodes[node.name] = [side]
 		end
+	end
+
+	def generate_bot_code runtime, node
+		generator = find_generator 'bot', :client
+		if generator == nil
+			puts "Generator for bot is not found.".red
+			return
+		end
+	
+		puts "Generating bot code for node '#{node.name}'..."
+		generator.generate node, runtime
 	end
 	
 	def find_generator language, side

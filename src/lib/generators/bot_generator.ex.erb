@@ -1,0 +1,102 @@
+<% for n in runtime.get_node_directions node, :client %>
+defmodule <%= node.namespace %>.<%= node.bot_client %> do
+  use GenServer
+
+  import <%= node.namespace %>.Enums
+
+  @version <%= runtime.version %>
+  <% for m in n.in_direction.messages.values %>
+  <%= m.bot_header_name %> <%= m.id %><% end %>
+  <% for m in n.out_direction.messages.values %>
+  <%= m.bot_header_name %> <%= m.id %><% end %>
+
+  def start_link(args) do
+    GenServer.start_link(__MODULE__, args)
+  end
+
+  def connect(client) do
+    GenServer.call(client, :connect, :infinity)
+  end
+
+  <% for m in n.out_direction.messages.values %>
+  @doc """
+  <%= m.doc %>
+
+  ## Parameters
+
+    - `client`: Bot client pid<% for p in m.members %>
+    - `<%= p.bot_name %>`: <%= p.doc %>
+    <% end %>
+  """
+  @spec <%= m.bot_send_name %>(client :: pid()<%= m.bot_params_with_types node %>) :: :ok
+  def <%= m.bot_send_name %>(client<%= m.bot_params %>) do
+    GenServer.cast(client, {:send, {:<%= m.bot_send_name %><%= m.bot_params %>}})
+  end
+  <% end %>
+
+  <% for m in n.in_direction.messages.values %>
+  @doc """
+  <%= m.doc %>
+
+  ## Parameters
+
+    - `client`: Bot client pid
+  """
+  @spec <%= m.bot_receive_name %>(client :: pid()) :: {:ok, {<%= m.bot_return_types node %>}}
+  def <%= m.bot_receive_name %>(client) do
+    GenServer.call(client, {:receive, :<%= m.bot_name %>}, :infinity)
+  end
+  <% end %>
+
+  def init(_args) do
+    {:ok, report} = BrotoriftBot.ReportManager.create_report()
+    {:ok, tcp_client} = BrotoriftBot.TcpClientSupervisor.create_client(report, self())
+    {:ok, {report, tcp_client}}
+  end
+
+  def handle_call(:connect, _from, {report, tcp_client}) do
+    BrotoriftBot.TcpClient.connect(tcp_client, @version)
+    {:reply, :ok, {report, tcp_client}}
+  end
+
+  <% for m in n.in_direction.messages.values %>
+  def handle_call({:receive, :<%= m.bot_name %>}, _from, {report, tcp_client}) do
+    start_time = Time.utc_now()
+    data = try_receive(<%= m.bot_header_name %>, tcp_client)
+    stop_time = Time.utc_now()
+    BrotoriftBot.Report.receive(report, :<%= m.bot_name %>, start_time, stop_time)
+
+    content = parse_packet(:<%= m.bot_name %>, data)
+    {:reply, {:ok, content}, {report, tcp_client}}
+  end
+  <% end %>
+  <% for m in n.out_direction.messages.values %>
+  def handle_cast({:send, {:<%= m.bot_send_name %><%= m.bot_params %>}}, {report, tcp_client}) do
+    data = <<<%= m.bot_header_name %>::32-little>><% for p in m.members %>
+    data = <%= p.type.bot_write node, p.bot_name %><% end %>
+    time = Time.utc_now()
+    :ok = BrotoriftBot.TcpClient.send_packet(tcp_client, data)
+    BrotoriftBot.Report.send(report, :<%= m.bot_name %>, time)
+    {:noreply, {report, tcp_client}}
+  end
+  <% end %>
+
+  defp try_receive(message, tcp_client) do
+    receive do
+      {^message, value} ->
+        value
+      _ ->
+        try_receive(message, tcp_client)
+    end
+  end
+
+  <% for m in n.in_direction.messages.values %>
+  defp parse_packet(:<%= m.bot_name %>, data) do<% for p in m.members %>
+    {data, <%= p.bot_name %>} = <%= p.type.bot_read node %><% end %>
+    <<>> = data
+    {<%= m.bot_returns %>}
+  end
+  <% end %>
+end
+
+<% end %>
